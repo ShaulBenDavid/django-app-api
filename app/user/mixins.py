@@ -5,7 +5,7 @@ from rest_framework import exceptions as rest_exceptions
 from django.core.exceptions import ValidationError
 
 from .utils import get_error_message
-from apps.core.models import User
+from app.core.models import User
 
 
 class ApiAuthMixin:
