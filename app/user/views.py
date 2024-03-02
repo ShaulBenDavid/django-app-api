@@ -4,11 +4,11 @@ from rest_framework.views import APIView
 from django.conf import settings
 from django.shortcuts import redirect
 from rest_framework.response import Response
-from app.user.mixins import PublicApiMixin, ApiErrorsMixin
-from app.user.utils import google_get_access_token, google_get_user_info, generate_tokens_for_user
-from app.core.models import User
+from user.mixins import PublicApiMixin, ApiErrorsMixin
+from user.utils import google_get_access_token, google_get_user_info, generate_tokens_for_user
+from core.models import User
 from rest_framework import status
-from app.user.serializers import UserSerializer
+from user.serializers import UserSerializer
 
 
 class GoogleLoginApi(PublicApiMixin, ApiErrorsMixin, APIView):
