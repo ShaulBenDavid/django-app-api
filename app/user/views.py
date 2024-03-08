@@ -37,14 +37,16 @@ class GoogleLoginApi(PublicApiMixin, ApiErrorsMixin, APIView):
         print(access_token)
 
         user_data = google_get_user_info(access_token=access_token)
+        print(user_data)
 
         try:
             user = User.objects.get(email=user_data['email'])
             access_token, refresh_token = generate_tokens_for_user(user)
             response_data = {
                 'user': UserSerializer(user).data,
+                'picture': user_data['picture'],
                 'access_token': str(access_token),
-                'refresh_token': str(refresh_token)
+                'refresh_token': str(refresh_token),
             }
             return Response(response_data, status=status.HTTP_200_OK)
         except User.DoesNotExist:
@@ -62,6 +64,7 @@ class GoogleLoginApi(PublicApiMixin, ApiErrorsMixin, APIView):
             access_token, refresh_token = generate_tokens_for_user(user)
             response_data = {
                 'user': UserSerializer(user).data,
+                'picture': user_data['picture'],
                 'access_token': str(access_token),
                 'refresh_token': str(refresh_token)
             }
