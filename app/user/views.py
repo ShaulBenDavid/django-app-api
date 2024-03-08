@@ -34,6 +34,7 @@ class GoogleLoginApi(PublicApiMixin, ApiErrorsMixin, APIView):
         redirect_uri = f'{settings.BASE_FRONTEND_URL}/google'
         access_token = google_get_access_token(code=code,
                                                redirect_uri=redirect_uri)
+        print(access_token)
 
         user_data = google_get_user_info(access_token=access_token)
 
@@ -47,12 +48,12 @@ class GoogleLoginApi(PublicApiMixin, ApiErrorsMixin, APIView):
             }
             return Response(response_data, status=status.HTTP_200_OK)
         except User.DoesNotExist:
-            # username = user_data['email'].split('@')[0]
             first_name = user_data.get('given_name', '')
             last_name = user_data.get('family_name', '')
 
             user = User.objects.create(
                 email=user_data['email'],
+                username=user_data['email'],
                 first_name=first_name,
                 last_name=last_name,
                 registration_method='google'

@@ -140,6 +140,14 @@ REST_FRAMEWORK = {
     )
 }
 
+CORS_ALLOWED_ORIGINS = [
+    "http://localhost:3000",  # Replace with the actual origin of your React app
+]
+
+# Optional: Allow credentials (cookies, authorization headers, etc.)
+CORS_ALLOW_CREDENTIALS = True
+
+
 # Google OAuth2 settings
 BASE_FRONTEND_URL = os.environ.get('DJANGO_BASE_FRONTEND_URL')
 GOOGLE_OAUTH2_CLIENT_ID = os.environ.get('GOOGLE_OAUTH2_CLIENT_ID')
