@@ -1,3 +1,4 @@
+from datetime import timedelta, datetime
 from urllib.parse import urlencode
 from rest_framework import serializers
 from rest_framework.views import APIView
@@ -34,10 +35,8 @@ class GoogleLoginApi(PublicApiMixin, ApiErrorsMixin, APIView):
         redirect_uri = f'{settings.BASE_FRONTEND_URL}/google'
         access_token = google_get_access_token(code=code,
                                                redirect_uri=redirect_uri)
-        print(access_token)
 
         user_data = google_get_user_info(access_token=access_token)
-        print(user_data)
 
         try:
             user = User.objects.get(email=user_data['email'])
@@ -46,9 +45,11 @@ class GoogleLoginApi(PublicApiMixin, ApiErrorsMixin, APIView):
                 'user': UserSerializer(user).data,
                 'picture': user_data['picture'],
                 'access_token': str(access_token),
-                'refresh_token': str(refresh_token),
             }
-            return Response(response_data, status=status.HTTP_200_OK)
+            response = Response(response_data, status=status.HTTP_200_OK)
+            expiration_time = datetime.utcnow() + timedelta(weeks=1)
+            response.set_cookie('refresh', str(refresh_token), httponly=True, expires=expiration_time, samesite='None', secure=True)
+            return response
         except User.DoesNotExist:
             first_name = user_data.get('given_name', '')
             last_name = user_data.get('family_name', '')
