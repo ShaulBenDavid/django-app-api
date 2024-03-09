@@ -1,10 +1,15 @@
 from datetime import timedelta, datetime
 from urllib.parse import urlencode
+
+
 from rest_framework import serializers
+from rest_framework.decorators import api_view
 from rest_framework.views import APIView
 from django.conf import settings
 from django.shortcuts import redirect
 from rest_framework.response import Response
+from rest_framework_simplejwt.tokens import RefreshToken
+
 from user.mixins import PublicApiMixin, ApiErrorsMixin
 from user.utils import google_get_access_token, google_get_user_info, generate_tokens_for_user
 from core.models import User
@@ -70,3 +75,42 @@ class GoogleLoginApi(PublicApiMixin, ApiErrorsMixin, APIView):
                 'refresh_token': str(refresh_token)
             }
             return Response(response_data, status=status.HTTP_200_OK)
+
+
+@api_view(['GET', 'DELETE'])
+class RefreshTokenView:
+    @staticmethod
+    def get(self, request):
+        """
+        Refresh the access token using the provided refresh token from a cookie
+        """
+        refresh_token = request.COOKIES.get('refresh_token')
+
+        if not refresh_token:
+            return Response({'error': 'Refresh token is required'}, status=status.HTTP_400_BAD_REQUEST)
+
+        try:
+            refresh = RefreshToken(refresh_token)
+            user_data = User.objects.get(id=refresh['id'])
+            access_token = str(refresh.access_token)
+            response_data = {
+                'user': UserSerializer(user_data).data,
+                'picture': user_data['picture'],
+                'access_token': str(access_token),
+            }
+            return Response(response_data, status=status.HTTP_200_OK)
+        except RefreshToken.Expired:
+            return Response({'error': 'Refresh token has expired'}, status=status.HTTP_401_UNAUTHORIZED)
+        except RefreshToken.InvalidToken:
+            return Response({'error': 'Invalid refresh token'}, status=status.HTTP_401_UNAUTHORIZED)
+        except User.DoesNotExist:
+            return Response({'error': 'Refresh token has expired'}, status=status.HTTP_400_BAD_REQUEST)
+
+    @staticmethod
+    def delete(self, request):
+        """
+        Logout and delete the refresh token cookie
+        """
+        response = Response({'message': 'Logout successful'}, status=status.HTTP_200_OK)
+        response.delete_cookie('refresh_token')
+        return response
