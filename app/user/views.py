@@ -1,9 +1,9 @@
 from datetime import timedelta, datetime
 from urllib.parse import urlencode
 
-
+from drf_spectacular.types import OpenApiTypes
+from drf_spectacular.utils import extend_schema_view, extend_schema, OpenApiParameter
 from rest_framework import serializers
-from rest_framework.decorators import api_view
 from rest_framework.views import APIView
 from django.conf import settings
 from django.shortcuts import redirect
@@ -17,10 +17,28 @@ from rest_framework import status
 from user.serializers import UserSerializer
 
 
+@extend_schema(
+    parameters=[
+        OpenApiParameter(
+            'code',
+            OpenApiTypes.STR,
+            description='Enter the token you get from Google.',
+            required=False,
+        ),
+        OpenApiParameter(
+            'error',
+            OpenApiTypes.STR,
+            description='Error message from Google.',
+            required=False,
+        ),
+    ]
+)
 class GoogleLoginApi(PublicApiMixin, ApiErrorsMixin, APIView):
     class InputSerializer(serializers.Serializer):
         code = serializers.CharField(required=False)
         error = serializers.CharField(required=False)
+
+    serializer_class = InputSerializer
 
     def get(self, request, *args, **kwargs):
         input_serializer = self.InputSerializer(data=request.GET)
@@ -48,7 +66,6 @@ class GoogleLoginApi(PublicApiMixin, ApiErrorsMixin, APIView):
             access_token, refresh_token = generate_tokens_for_user(user)
             response_data = {
                 'user': UserSerializer(user).data,
-                'picture': user_data['picture'],
                 'access_token': str(access_token),
             }
             response = Response(response_data, status=status.HTTP_200_OK)
@@ -62,6 +79,7 @@ class GoogleLoginApi(PublicApiMixin, ApiErrorsMixin, APIView):
             user = User.objects.create(
                 email=user_data['email'],
                 username=user_data['email'],
+                image_url=user_data['picture'],
                 first_name=first_name,
                 last_name=last_name,
                 registration_method='google'
@@ -70,21 +88,34 @@ class GoogleLoginApi(PublicApiMixin, ApiErrorsMixin, APIView):
             access_token, refresh_token = generate_tokens_for_user(user)
             response_data = {
                 'user': UserSerializer(user).data,
-                'picture': user_data['picture'],
                 'access_token': str(access_token),
                 'refresh_token': str(refresh_token)
             }
             return Response(response_data, status=status.HTTP_200_OK)
 
 
-@api_view(['GET', 'DELETE'])
-class RefreshTokenView:
-    @staticmethod
+class RefreshTokenView(APIView):
+    @extend_schema(
+        parameters=[
+            OpenApiParameter(
+                'refresh',
+                OpenApiTypes.STR,
+                location=OpenApiParameter.HEADER,
+                required=True,
+                description='The refresh token to be used for token refresh.',
+            ),
+        ],
+        responses={
+            200: UserSerializer(many=False),
+            400: 'Refresh token has expired or is invalid',
+            401: 'Refresh token has expired or is invalid',
+        }
+    )
     def get(self, request):
         """
         Refresh the access token using the provided refresh token from a cookie
         """
-        refresh_token = request.COOKIES.get('refresh_token')
+        refresh_token = request.COOKIES.get('refresh')
 
         if not refresh_token:
             return Response({'error': 'Refresh token is required'}, status=status.HTTP_400_BAD_REQUEST)
@@ -95,7 +126,6 @@ class RefreshTokenView:
             access_token = str(refresh.access_token)
             response_data = {
                 'user': UserSerializer(user_data).data,
-                'picture': user_data['picture'],
                 'access_token': str(access_token),
             }
             return Response(response_data, status=status.HTTP_200_OK)
@@ -106,7 +136,18 @@ class RefreshTokenView:
         except User.DoesNotExist:
             return Response({'error': 'Refresh token has expired'}, status=status.HTTP_400_BAD_REQUEST)
 
-    @staticmethod
+    @extend_schema(
+        parameters=[
+            OpenApiParameter(
+                'refresh',
+                OpenApiTypes.STR,
+                location=OpenApiParameter.HEADER,
+                required=True,
+                description='The refresh token to be used for token refresh.',
+            ),
+        ],
+        responses={200: 'Logout successful'},
+    )
     def delete(self, request):
         """
         Logout and delete the refresh token cookie
