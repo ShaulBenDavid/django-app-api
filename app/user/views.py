@@ -2,7 +2,7 @@ from datetime import timedelta, datetime
 from urllib.parse import urlencode
 
 from drf_spectacular.types import OpenApiTypes
-from drf_spectacular.utils import extend_schema_view, extend_schema, OpenApiParameter
+from drf_spectacular.utils import extend_schema, OpenApiParameter
 from rest_framework import serializers
 from rest_framework.views import APIView
 from django.conf import settings
