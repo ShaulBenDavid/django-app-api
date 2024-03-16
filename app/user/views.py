@@ -1,4 +1,3 @@
-from datetime import timedelta, datetime
 from urllib.parse import urlencode
 
 from drf_spectacular.types import OpenApiTypes
@@ -63,35 +62,36 @@ class GoogleLoginApi(PublicApiMixin, ApiErrorsMixin, APIView):
 
         try:
             user = User.objects.get(email=user_data['email'])
-            access_token, refresh_token = generate_tokens_for_user(user)
-            response_data = {
-                'user': UserSerializer(user).data,
-                'access_token': str(access_token),
-            }
-            response = Response(response_data, status=status.HTTP_200_OK)
-            expiration_time = datetime.utcnow() + timedelta(weeks=1)
-            response.set_cookie('refresh', str(refresh_token), httponly=True, expires=expiration_time, samesite='None', secure=True)
-            return response
         except User.DoesNotExist:
-            first_name = user_data.get('given_name', '')
-            last_name = user_data.get('family_name', '')
+            user = self._create_user(user_data)
 
-            user = User.objects.create(
-                email=user_data['email'],
-                username=user_data['email'],
-                image_url=user_data['picture'],
-                first_name=first_name,
-                last_name=last_name,
-                registration_method='google'
-            )
+        access_token, refresh_token = generate_tokens_for_user(user)
+        response_data = {
+            'user': UserSerializer(user).data,
+            'access_token': str(access_token),
+        }
+        response = Response(response_data, status=status.HTTP_200_OK)
+        response.set_cookie(
+                key=settings.SIMPLE_JWT['AUTH_COOKIE'],
+                value=str(refresh_token),
+                expires=settings.SIMPLE_JWT['ACCESS_TOKEN_LIFETIME'],
+                secure=settings.SIMPLE_JWT['AUTH_COOKIE_SECURE'],
+                httponly=settings.SIMPLE_JWT['AUTH_COOKIE_HTTP_ONLY'],
+                samesite=settings.SIMPLE_JWT['AUTH_COOKIE_SAMESITE'])
+        return response
 
-            access_token, refresh_token = generate_tokens_for_user(user)
-            response_data = {
-                'user': UserSerializer(user).data,
-                'access_token': str(access_token),
-                'refresh_token': str(refresh_token)
-            }
-            return Response(response_data, status=status.HTTP_200_OK)
+    def _create_user(self, user_data):
+        first_name = user_data.get('given_name', '')
+        last_name = user_data.get('family_name', '')
+
+        return User.objects.create(
+            email=user_data['email'],
+            username=user_data['email'],
+            image_url=user_data['picture'],
+            first_name=first_name,
+            last_name=last_name,
+            registration_method='google'
+        )
 
 
 class RefreshTokenView(APIView):
@@ -115,26 +115,25 @@ class RefreshTokenView(APIView):
         """
         Refresh the access token using the provided refresh token from a cookie
         """
-        refresh_token = request.COOKIES.get('refresh')
+        refresh_token = request.COOKIES.get(settings.SIMPLE_JWT['AUTH_COOKIE'])
 
         if not refresh_token:
-            return Response({'error': 'Refresh token is required'}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({'error': 'Refresh token is required'}, status=status.HTTP_401_UNAUTHORIZED)
 
         try:
             refresh = RefreshToken(refresh_token)
-            user_data = User.objects.get(id=refresh['id'])
+            user_data = User.objects.get(id=refresh['user_id'])
             access_token = str(refresh.access_token)
+
             response_data = {
                 'user': UserSerializer(user_data).data,
                 'access_token': str(access_token),
             }
             return Response(response_data, status=status.HTTP_200_OK)
-        except RefreshToken.Expired:
-            return Response({'error': 'Refresh token has expired'}, status=status.HTTP_401_UNAUTHORIZED)
-        except RefreshToken.InvalidToken:
-            return Response({'error': 'Invalid refresh token'}, status=status.HTTP_401_UNAUTHORIZED)
         except User.DoesNotExist:
             return Response({'error': 'Refresh token has expired'}, status=status.HTTP_400_BAD_REQUEST)
+        except Exception as e:
+            return Response({'error': e}, status=status.HTTP_401_UNAUTHORIZED)
 
     @extend_schema(
         parameters=[
@@ -153,5 +152,11 @@ class RefreshTokenView(APIView):
         Logout and delete the refresh token cookie
         """
         response = Response({'message': 'Logout successful'}, status=status.HTTP_200_OK)
-        response.delete_cookie('refresh_token')
+        response.set_cookie(
+            key=settings.SIMPLE_JWT['AUTH_COOKIE'],
+            value='',
+            expires=0,
+            secure=settings.SIMPLE_JWT['AUTH_COOKIE_SECURE'],
+            httponly=settings.SIMPLE_JWT['AUTH_COOKIE_HTTP_ONLY'],
+            samesite=settings.SIMPLE_JWT['AUTH_COOKIE_SAMESITE'])
         return response
