@@ -2,7 +2,8 @@ from urllib.parse import urlencode
 
 from drf_spectacular.types import OpenApiTypes
 from drf_spectacular.utils import extend_schema, OpenApiParameter
-from rest_framework import serializers
+from rest_framework import serializers, generics
+from rest_framework.permissions import IsAuthenticated
 from rest_framework.views import APIView
 from django.conf import settings
 from django.shortcuts import redirect
@@ -13,7 +14,7 @@ from user.mixins import PublicApiMixin, ApiErrorsMixin
 from user.utils import google_get_access_token, google_get_user_info, generate_tokens_for_user
 from core.models import User
 from rest_framework import status
-from user.serializers import UserSerializer
+from user.serializers import UserSerializer, UserInfoSerializer
 
 
 @extend_schema(
@@ -160,3 +161,10 @@ class RefreshTokenView(APIView):
             httponly=settings.SIMPLE_JWT['AUTH_COOKIE_HTTP_ONLY'],
             samesite=settings.SIMPLE_JWT['AUTH_COOKIE_SAMESITE'])
         return response
+
+class UserInfoView(generics.RetrieveAPIView):
+    serializer_class = UserInfoSerializer
+    permission_classes = [IsAuthenticated]
+
+    def get_object(self):
+        return self.request.user
