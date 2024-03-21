@@ -9,8 +9,8 @@ from core.models import User
 
 
 class ApiAuthMixin:
-    authentication_classes = (JWTAuthentication, )
-    permission_classes = (IsAuthenticated, )
+    authentication_classes = (JWTAuthentication,)
+    permission_classes = (IsAuthenticated,)
 
 
 class PublicApiMixin:
@@ -23,11 +23,12 @@ class ApiErrorsMixin:
     Mixin that transforms Django and Python exceptions into rest_framework ones.
     Without the mixin, they return 500 status code which is not desired.
     """
+
     expected_exceptions = {
         ValueError: rest_exceptions.ValidationError,
         ValidationError: rest_exceptions.ValidationError,
         PermissionError: rest_exceptions.PermissionDenied,
-        User.DoesNotExist: rest_exceptions.NotAuthenticated
+        User.DoesNotExist: rest_exceptions.NotAuthenticated,
     }
 
     def handle_exception(self, exc):

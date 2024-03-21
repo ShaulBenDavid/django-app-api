@@ -6,17 +6,15 @@ class User(AbstractUser):
     email = models.CharField(max_length=250, unique=True, null=False, blank=False)
     image_url = models.URLField(null=True, blank=True)
     REGISTRATION_CHOICES = [
-        ('email', 'Email'),
-        ('google', 'Google'),
+        ("email", "Email"),
+        ("google", "Google"),
     ]
     registration_method = models.CharField(
-        max_length=10,
-        choices=REGISTRATION_CHOICES,
-        default='email'
+        max_length=10, choices=REGISTRATION_CHOICES, default="email"
     )
 
     def __str__(self):
-       return self.username
+        return self.username
 
 
 class Profile(models.Model):
@@ -25,4 +23,4 @@ class Profile(models.Model):
     image_url = models.URLField(null=True, blank=True)
 
     def __str__(self):
-       return self.username
+        return self.username
