@@ -61,7 +61,9 @@ class GoogleLoginApi(PublicApiMixin, ApiErrorsMixin, APIView):
             return redirect(f"{login_url}?{params}")
 
         redirect_uri = f"{settings.BASE_FRONTEND_URL}/google"
-        google_access_token = google_get_access_token(code=code, redirect_uri=redirect_uri)
+        google_access_token = google_get_access_token(
+            code=code, redirect_uri=redirect_uri
+        )
 
         user_data = google_get_user_info(access_token=google_access_token)
 
@@ -70,7 +72,9 @@ class GoogleLoginApi(PublicApiMixin, ApiErrorsMixin, APIView):
         except User.DoesNotExist:
             user = self._create_user(user_data)
 
-        access_token, refresh_token = generate_tokens_for_user(user, google_access_token)
+        access_token, refresh_token = generate_tokens_for_user(
+            user, google_access_token
+        )
         response_data = {
             "user": UserSerializer(user).data,
             "access_token": str(access_token),
