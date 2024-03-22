@@ -44,6 +44,7 @@ INSTALLED_APPS = [
     "rest_framework",
     "drf_spectacular",
     "user.apps.UserConfig",
+    "subscribe",
 ]
 
 MIDDLEWARE = [
