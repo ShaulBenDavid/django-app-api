@@ -8,6 +8,7 @@ from rest_framework.views import APIView
 from django.conf import settings
 from django.shortcuts import redirect
 from rest_framework.response import Response
+from rest_framework_simplejwt.authentication import JWTAuthentication
 from rest_framework_simplejwt.tokens import RefreshToken
 
 from user.mixins import PublicApiMixin, ApiErrorsMixin
@@ -176,6 +177,7 @@ class RefreshTokenView(APIView):
 
 class UserInfoView(generics.RetrieveAPIView):
     serializer_class = UserInfoSerializer
+    authentication_classes = [JWTAuthentication]
     permission_classes = [IsAuthenticated]
 
     def get_object(self):
