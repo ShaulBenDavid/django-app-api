@@ -2,20 +2,19 @@ import requests
 from typing import Dict, Any
 from django.conf import settings
 from django.core.exceptions import ValidationError
-from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
-
+from user.serializers import CustomTokenObtainPairSerializer
 
 GOOGLE_ID_TOKEN_INFO_URL = "https://www.googleapis.com/oauth2/v3/tokeninfo"
 GOOGLE_ACCESS_TOKEN_OBTAIN_URL = "https://oauth2.googleapis.com/token"
 GOOGLE_USER_INFO_URL = "https://www.googleapis.com/oauth2/v3/userinfo"
 
 
-def generate_tokens_for_user(user):
+def generate_tokens_for_user(user, google_token):
     """
     Generate access and refresh tokens for the given user
     """
-    serializer = TokenObtainPairSerializer()
-    token_data = serializer.get_token(user)
+    serializer = CustomTokenObtainPairSerializer()
+    token_data = serializer.get_token(user, google_token=google_token)
     access_token = token_data.access_token
     refresh_token = token_data
     return access_token, refresh_token

@@ -1,4 +1,6 @@
 from rest_framework import serializers
+from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
+
 from core.models import User
 
 
@@ -15,3 +17,12 @@ class UserInfoSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
         fields = ["username", "image_url", "email", "first_name", "last_name"]
+
+class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
+    @classmethod
+    def get_token(cls, user, **kwargs):
+        google_token = kwargs.get('google_token')
+        token = super().get_token(user)
+        # Google access token - for accessing the YouTube data
+        token['google_token'] = google_token
+        return token
