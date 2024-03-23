@@ -8,10 +8,9 @@ YOUTUBE_SUBSCRIPTIONS_URL = "https://www.googleapis.com/youtube/v3/subscriptions
 def get_youtube_subscriptions(access_token):
     params = {
         "part": "snippet,contentDetails",
-        "mine": "true",
-        "key": "AIzaSyBOOry61odkj5jCl1TbDny-zPmYce0ShPg",
+        "mine": True,
+        "key": settings.GOOGLE_API_KEY,
         "maxResults": 200,  # Adjust as needed
-        "access_token": access_token,
     }
     headers = {"Authorization": f"Bearer {access_token}"}
     try:
