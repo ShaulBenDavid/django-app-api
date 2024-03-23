@@ -6,7 +6,7 @@ from rest_framework_simplejwt.authentication import JWTAuthentication
 from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework import status
 from app import settings
-from .utils import get_youtube_subscriptions
+from .utils import get_youtube_subscriptions, transform_subscriptions
 
 
 class SubscriptionsView(APIView):
@@ -37,7 +37,8 @@ class SubscriptionsView(APIView):
             if access_token:
                 try:
                     subscriptions = get_youtube_subscriptions(access_token)
-                    return Response({"subscriptions": subscriptions})
+                    transformed_subscriptions = transform_subscriptions(subscriptions)
+                    return Response({"subscriptions": transformed_subscriptions})
                 except RuntimeError as e:
                     # Handle the error raised by get_youtube_subscriptions
                     return Response(

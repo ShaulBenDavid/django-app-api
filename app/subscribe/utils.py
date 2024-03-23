@@ -24,3 +24,27 @@ def get_youtube_subscriptions(access_token):
     except requests.exceptions.RequestException as e:
         # Log the error or handle it as needed
         raise RuntimeError(f"Failed to retrieve subscriptions: {e}")
+
+
+def transform_subscriptions(subscriptions):
+    """
+    Transform the subscriptions data as needed.
+    """
+    transformed_subscriptions = []
+    for subscription in subscriptions:
+        snippet = subscription.get("snippet", {})
+
+        title = snippet.get("title", "")
+        channel_id = snippet.get("channelId", "")
+        image_url = snippet.get("thumbnails", {}).get("medium", {}).get("url", "")
+        description = snippet.get("description", "")
+
+        transformed_subscriptions.append(
+            {
+                "title": title,
+                "channel_id": channel_id,
+                "image_url": image_url,
+                "description": description,
+            }
+        )
+    return transformed_subscriptions
