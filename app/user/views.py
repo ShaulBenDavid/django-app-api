@@ -149,7 +149,7 @@ class RefreshTokenView(APIView):
                 status=status.HTTP_400_BAD_REQUEST,
             )
         except Exception as e:
-            return Response({"error": e}, status=status.HTTP_401_UNAUTHORIZED)
+            return Response({"error": str(e)}, status=status.HTTP_401_UNAUTHORIZED)
 
     @extend_schema(
         parameters=[
