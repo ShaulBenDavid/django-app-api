@@ -1,5 +1,4 @@
 from django.contrib.auth.models import AbstractUser
-from django.conf import settings
 from django.db import models
 
 
@@ -28,34 +27,38 @@ class Profile(models.Model):
 
 
 ## USER Subscription list
+class UserSubscriptionCollection(models.Model):
+    user = models.OneToOneField(
+        Profile, on_delete=models.CASCADE, related_name="user_subscription_list"
+    )
+
+    def __str__(self):
+        return f"{self.user.name}'s Item List"
+
+
 class Group(models.Model):
     title = models.CharField(max_length=100)
     description = models.TextField(max_length=255)
-    user = models.ForeignKey(
-        settings.AUTH_USER_MODEL,
-        on_delete=models.CASCADE,
+    user_list = models.ForeignKey(
+        UserSubscriptionCollection, on_delete=models.CASCADE, related_name="user_groups"
     )
+
     def __str__(self):
         return self.title
 
     class Meta:
-        unique_together = ('title', 'user')
+        unique_together = ("title", "user_list")
+
 
 class Subscription(models.Model):
     title = models.CharField(max_length=100)
     description = models.TextField(max_length=500)
     channel_id = models.CharField(max_length=100, unique=True)
     image_url = models.URLField(null=True, blank=True)
-    group = models.ForeignKey(Group, on_delete=models.SET_NULL, null=True, blank=True)
-    users = models.ManyToManyField(settings.AUTH_USER_MODEL, related_name='subscriptions')
+    group = models.ManyToManyField(Group, related_name="subscriptions", blank=True)
+    users_list = models.ManyToManyField(
+        UserSubscriptionCollection, related_name="subscriptions"
+    )
 
     def __str__(self):
         return self.title
-
-
-class UserSubscriptionList(models.Model):
-    user = models.OneToOneField(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='user_subscription_list')
-    subscriptions = models.ManyToManyField(Subscription, related_name='subscription_lists')
-
-    def __str__(self):
-        return f"{self.user.name}'s Item List"
