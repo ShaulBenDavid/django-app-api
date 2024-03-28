@@ -35,7 +35,7 @@ def transform_subscriptions(subscriptions):
         snippet = subscription.get("snippet", {})
 
         title = snippet.get("title", "")
-        channel_id = snippet.get("channelId", "")
+        channel_id = snippet.get("resourceId", {}).get("channelId", "")
         image_url = snippet.get("thumbnails", {}).get("medium", {}).get("url", "")
         description = snippet.get("description", "")
 

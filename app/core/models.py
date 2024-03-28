@@ -18,7 +18,7 @@ class User(AbstractUser):
 
 
 class Profile(models.Model):
-    user = models.OneToOneField(User, on_delete=models.CASCADE)
+    user = models.OneToOneField(User, on_delete=models.CASCADE, related_name="profile")
     username = models.CharField(max_length=100)
     image_url = models.URLField(null=True, blank=True)
 
@@ -33,7 +33,7 @@ class UserSubscriptionCollection(models.Model):
     )
 
     def __str__(self):
-        return f"{self.user.name}'s Item List"
+        return self.user
 
 
 class Group(models.Model):
