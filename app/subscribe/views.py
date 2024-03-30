@@ -17,6 +17,7 @@ class SubscriptionsView(APIView):
 
     authentication_classes = [JWTAuthentication]
     permission_classes = [IsAuthenticated]
+
     @extend_schema(
         parameters=[
             OpenApiParameter(
@@ -25,14 +26,14 @@ class SubscriptionsView(APIView):
                 description="Google token",
                 required=True,
             )
-        ]
+        ],
     )
     def get(self, request):
         """
         Return a list of all user subscriptions.
         """
         # Retrieve Google token from X-Google-Token header
-        google_token = request.headers.get('X-Google-Token')
+        google_token = request.headers.get("X-Google-Token")
         if not google_token:
             return Response(
                 {"error": "X-Google-Token header is missing"},
@@ -44,7 +45,9 @@ class SubscriptionsView(APIView):
             transformed_subscriptions = transform_subscriptions(subscriptions)
 
             user_subscription_list, _ = (
-                UserSubscriptionCollection.objects.get_or_create(user=request.user.profile)
+                UserSubscriptionCollection.objects.get_or_create(
+                    user=request.user.profile
+                )
             )
             # If Subscription not already exist in user list we will create and save
             for subscription_data in transformed_subscriptions:

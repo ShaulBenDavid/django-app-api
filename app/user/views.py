@@ -15,7 +15,8 @@ from user.mixins import PublicApiMixin, ApiErrorsMixin
 from user.utils import (
     google_get_tokens,
     google_get_user_info,
-    generate_tokens_for_user, google_refresh_access_token,
+    generate_tokens_for_user,
+    google_refresh_access_token,
 )
 from core.models import User
 from rest_framework import status
@@ -133,7 +134,9 @@ class RefreshTokenView(APIView):
         Refresh the access token using the provided refresh token from a cookie
         """
         refresh_token = request.COOKIES.get(settings.SIMPLE_JWT["AUTH_COOKIE"])
-        google_refresh_token = request.COOKIES.get(settings.SIMPLE_JWT["AUTH_GOOGLE_COOKIE"])
+        google_refresh_token = request.COOKIES.get(
+            settings.SIMPLE_JWT["AUTH_GOOGLE_COOKIE"]
+        )
 
         if not refresh_token or not google_refresh_token:
             return Response(

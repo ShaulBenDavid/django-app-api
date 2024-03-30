@@ -39,6 +39,7 @@ def google_get_tokens(*, code: str, redirect_uri: str) -> Tuple[str, str]:
 
     return access_token, refresh_token
 
+
 def google_refresh_access_token(refresh_token: str) -> str:
     data = {
         "client_id": settings.GOOGLE_OAUTH2_CLIENT_ID,
@@ -50,10 +51,13 @@ def google_refresh_access_token(refresh_token: str) -> str:
     response = requests.post(GOOGLE_ACCESS_TOKEN_OBTAIN_URL, data=data)
 
     if not response.ok:
-        raise ValidationError("Failed to obtain access token from Google using refresh token.")
+        raise ValidationError(
+            "Failed to obtain access token from Google using refresh token."
+        )
 
     access_token = response.json()["access_token"]
     return access_token
+
 
 def google_get_user_info(*, access_token: str) -> Dict[str, Any]:
     response = requests.get(GOOGLE_USER_INFO_URL, params={"access_token": access_token})

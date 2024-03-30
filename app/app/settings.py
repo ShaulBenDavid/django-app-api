@@ -177,6 +177,15 @@ CORS_ALLOWED_ORIGINS = [
     "http://localhost:3000",
 ]
 
+CORS_ALLOW_HEADERS = [
+    "Accept",
+    "Accept-Encoding",
+    "Authorization",
+    "Content-Type",
+    "X-Google-Token",  # Add this line
+    # other headers as needed
+]
+
 # Optional: Allow credentials (cookies, authorization headers, etc.)
 CORS_ALLOW_CREDENTIALS = True
 
