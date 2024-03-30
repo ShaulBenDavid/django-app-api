@@ -163,10 +163,11 @@ SIMPLE_JWT = {
     "TOKEN_TYPE_CLAIM": "token_type",
     "JTI_CLAIM": "jti",
     "SLIDING_TOKEN_REFRESH_EXP_CLAIM": "refresh_exp",
-    "SLIDING_TOKEN_LIFETIME": timedelta(minutes=60),
+    "SLIDING_TOKEN_LIFETIME": timedelta(minutes=30),
     "SLIDING_TOKEN_REFRESH_LIFETIME": timedelta(days=3),
     # custom
     "AUTH_COOKIE": "refresh_token",
+    "AUTH_GOOGLE_COOKIE": "google_token",
     "AUTH_COOKIE_HTTP_ONLY": True,
     "AUTH_COOKIE_SECURE": True,
     "AUTH_COOKIE_SAMESITE": "None",

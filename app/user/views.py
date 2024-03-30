@@ -13,9 +13,9 @@ from rest_framework_simplejwt.tokens import RefreshToken
 
 from user.mixins import PublicApiMixin, ApiErrorsMixin
 from user.utils import (
-    google_get_access_token,
+    google_get_tokens,
     google_get_user_info,
-    generate_tokens_for_user,
+    generate_tokens_for_user, google_refresh_access_token,
 )
 from core.models import User
 from rest_framework import status
@@ -61,7 +61,7 @@ class GoogleLoginApi(PublicApiMixin, ApiErrorsMixin, APIView):
             return redirect(f"{login_url}?{params}")
 
         redirect_uri = f"{settings.BASE_FRONTEND_URL}/google"
-        google_access_token = google_get_access_token(
+        google_access_token, google_refresh_token = google_get_tokens(
             code=code, redirect_uri=redirect_uri
         )
 
@@ -72,17 +72,24 @@ class GoogleLoginApi(PublicApiMixin, ApiErrorsMixin, APIView):
         except User.DoesNotExist:
             user = self._create_user(user_data)
 
-        access_token, refresh_token = generate_tokens_for_user(
-            user, google_access_token
-        )
+        access_token, refresh_token = generate_tokens_for_user(user)
         response_data = {
             "user": UserSerializer(user).data,
             "access_token": str(access_token),
+            "google_token": str(google_access_token),
         }
         response = Response(response_data, status=status.HTTP_200_OK)
         response.set_cookie(
             key=settings.SIMPLE_JWT["AUTH_COOKIE"],
             value=str(refresh_token),
+            expires=settings.SIMPLE_JWT["ACCESS_TOKEN_LIFETIME"],
+            secure=settings.SIMPLE_JWT["AUTH_COOKIE_SECURE"],
+            httponly=settings.SIMPLE_JWT["AUTH_COOKIE_HTTP_ONLY"],
+            samesite=settings.SIMPLE_JWT["AUTH_COOKIE_SAMESITE"],
+        )
+        response.set_cookie(
+            key=settings.SIMPLE_JWT["AUTH_GOOGLE_COOKIE"],
+            value=str(google_refresh_token),
             expires=settings.SIMPLE_JWT["ACCESS_TOKEN_LIFETIME"],
             secure=settings.SIMPLE_JWT["AUTH_COOKIE_SECURE"],
             httponly=settings.SIMPLE_JWT["AUTH_COOKIE_HTTP_ONLY"],
@@ -126,8 +133,9 @@ class RefreshTokenView(APIView):
         Refresh the access token using the provided refresh token from a cookie
         """
         refresh_token = request.COOKIES.get(settings.SIMPLE_JWT["AUTH_COOKIE"])
+        google_refresh_token = request.COOKIES.get(settings.SIMPLE_JWT["AUTH_GOOGLE_COOKIE"])
 
-        if not refresh_token:
+        if not refresh_token or not google_refresh_token:
             return Response(
                 {"error": "Refresh token is required"},
                 status=status.HTTP_401_UNAUTHORIZED,
@@ -135,12 +143,14 @@ class RefreshTokenView(APIView):
 
         try:
             refresh = RefreshToken(refresh_token)
+            google_access = google_refresh_access_token(google_refresh_token)
             user_data = User.objects.get(id=refresh["user_id"])
             access_token = str(refresh.access_token)
 
             response_data = {
                 "user": UserSerializer(user_data).data,
                 "access_token": str(access_token),
+                "google_token": str(google_access),
             }
             return Response(response_data, status=status.HTTP_200_OK)
         except User.DoesNotExist:
@@ -170,6 +180,14 @@ class RefreshTokenView(APIView):
         response = Response({"message": "Logout successful"}, status=status.HTTP_200_OK)
         response.set_cookie(
             key=settings.SIMPLE_JWT["AUTH_COOKIE"],
+            value="",
+            expires=0,
+            secure=settings.SIMPLE_JWT["AUTH_COOKIE_SECURE"],
+            httponly=settings.SIMPLE_JWT["AUTH_COOKIE_HTTP_ONLY"],
+            samesite=settings.SIMPLE_JWT["AUTH_COOKIE_SAMESITE"],
+        )
+        response.set_cookie(
+            key=settings.SIMPLE_JWT["AUTH_GOOGLE_COOKIE"],
             value="",
             expires=0,
             secure=settings.SIMPLE_JWT["AUTH_COOKIE_SECURE"],

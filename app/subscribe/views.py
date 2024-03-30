@@ -1,11 +1,10 @@
+from drf_spectacular.utils import extend_schema, OpenApiParameter
+from drf_spectacular.types import OpenApiTypes
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.views import APIView
-from django.conf import settings
 from rest_framework.response import Response
 from rest_framework_simplejwt.authentication import JWTAuthentication
-from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework import status
-from app import settings
 from core.models import Subscription, UserSubscriptionCollection
 from .utils import get_youtube_subscriptions, transform_subscriptions
 
@@ -18,26 +17,30 @@ class SubscriptionsView(APIView):
 
     authentication_classes = [JWTAuthentication]
     permission_classes = [IsAuthenticated]
-
+    @extend_schema(
+        parameters=[
+            OpenApiParameter(
+                name="X-Google-Token",
+                type=OpenApiTypes.STR,
+                description="Google token",
+                required=True,
+            )
+        ]
+    )
     def get(self, request):
         """
         Return a list of all user subscriptions.
         """
-        refresh_token = request.COOKIES.get(settings.SIMPLE_JWT["AUTH_COOKIE"])
-        if not refresh_token:
+        # Retrieve Google token from X-Google-Token header
+        google_token = request.headers.get('X-Google-Token')
+        if not google_token:
             return Response(
-                {"error": "Refresh token is required"},
-                status=status.HTTP_401_UNAUTHORIZED,
+                {"error": "X-Google-Token header is missing"},
+                status=status.HTTP_400_BAD_REQUEST,
             )
 
         try:
-            refresh = RefreshToken(refresh_token)
-            access_token = refresh["google_token"]
-
-            if not access_token:
-                return Response({"error": "Access token is missing"}, status=400)
-
-            subscriptions = get_youtube_subscriptions(access_token)
+            subscriptions = get_youtube_subscriptions(google_token)
             transformed_subscriptions = transform_subscriptions(subscriptions)
 
             user_subscription_list, _ = (

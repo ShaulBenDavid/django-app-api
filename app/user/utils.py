@@ -1,5 +1,5 @@
 import requests
-from typing import Dict, Any
+from typing import Dict, Any, Tuple
 from django.conf import settings
 from django.core.exceptions import ValidationError
 from user.serializers import CustomTokenObtainPairSerializer
@@ -9,18 +9,18 @@ GOOGLE_ACCESS_TOKEN_OBTAIN_URL = "https://oauth2.googleapis.com/token"
 GOOGLE_USER_INFO_URL = "https://www.googleapis.com/oauth2/v3/userinfo"
 
 
-def generate_tokens_for_user(user, google_token):
+def generate_tokens_for_user(user):
     """
     Generate access and refresh tokens for the given user
     """
     serializer = CustomTokenObtainPairSerializer()
-    token_data = serializer.get_token(user, google_token=google_token)
+    token_data = serializer.get_token(user)
     access_token = token_data.access_token
     refresh_token = token_data
     return access_token, refresh_token
 
 
-def google_get_access_token(*, code: str, redirect_uri: str) -> str:
+def google_get_tokens(*, code: str, redirect_uri: str) -> Tuple[str, str]:
     data = {
         "code": code,
         "client_id": settings.GOOGLE_OAUTH2_CLIENT_ID,
@@ -35,9 +35,25 @@ def google_get_access_token(*, code: str, redirect_uri: str) -> str:
         raise ValidationError("Failed to obtain access token from Google.")
 
     access_token = response.json()["access_token"]
+    refresh_token = response.json()["refresh_token"]
 
+    return access_token, refresh_token
+
+def google_refresh_access_token(refresh_token: str) -> str:
+    data = {
+        "client_id": settings.GOOGLE_OAUTH2_CLIENT_ID,
+        "client_secret": settings.GOOGLE_OAUTH2_CLIENT_SECRET,
+        "refresh_token": refresh_token,
+        "grant_type": "refresh_token",
+    }
+
+    response = requests.post(GOOGLE_ACCESS_TOKEN_OBTAIN_URL, data=data)
+
+    if not response.ok:
+        raise ValidationError("Failed to obtain access token from Google using refresh token.")
+
+    access_token = response.json()["access_token"]
     return access_token
-
 
 def google_get_user_info(*, access_token: str) -> Dict[str, Any]:
     response = requests.get(GOOGLE_USER_INFO_URL, params={"access_token": access_token})
