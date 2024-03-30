@@ -20,7 +20,7 @@ from user.utils import (
 )
 from core.models import User
 from rest_framework import status
-from user.serializers import UserSerializer, UserInfoSerializer
+from user.serializers import UserInfoSerializer
 
 
 @extend_schema(
@@ -75,7 +75,6 @@ class GoogleLoginApi(PublicApiMixin, ApiErrorsMixin, APIView):
 
         access_token, refresh_token = generate_tokens_for_user(user)
         response_data = {
-            "user": UserSerializer(user).data,
             "access_token": str(access_token),
             "google_token": str(google_access_token),
         }
@@ -124,7 +123,7 @@ class RefreshTokenView(APIView):
             ),
         ],
         responses={
-            200: UserSerializer(many=False),
+            200: "tokens refreshed",
             400: "Refresh token has expired or is invalid",
             401: "Refresh token has expired or is invalid",
         },
@@ -147,11 +146,9 @@ class RefreshTokenView(APIView):
         try:
             refresh = RefreshToken(refresh_token)
             google_access = google_refresh_access_token(google_refresh_token)
-            user_data = User.objects.get(id=refresh["user_id"])
             access_token = str(refresh.access_token)
 
             response_data = {
-                "user": UserSerializer(user_data).data,
                 "access_token": str(access_token),
                 "google_token": str(google_access),
             }
