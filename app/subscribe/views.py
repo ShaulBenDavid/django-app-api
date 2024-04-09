@@ -43,21 +43,24 @@ class SubscriptionsView(APIView):
             )
 
         try:
-            user_subscription_list, created = UserSubscriptionCollection.objects.update_or_create(
-                user=request.user.profile,
-                defaults={'last_data_sync': timezone.now()}
+            user_subscription_list, created = (
+                UserSubscriptionCollection.objects.update_or_create(
+                    user=request.user.profile,
+                    defaults={"last_data_sync": timezone.now()},
+                )
             )
 
             current_month = timezone.now().month
             last_sync_month = user_subscription_list.last_data_sync.month
             # We sync data from YouTube only once a month
             if current_month == last_sync_month and not created:
-                serializer = SubscriptionSerializer(user_subscription_list.subscriptions.all(), many=True)
+                serializer = SubscriptionSerializer(
+                    user_subscription_list.subscriptions.all(), many=True
+                )
                 return Response({"subscriptions": serializer.data})
 
             subscriptions = get_youtube_subscriptions(google_token)
             transformed_subscriptions = transform_subscriptions(subscriptions)
-
 
             # If Subscription not already exist in user list we will create and save
             for subscription_data in transformed_subscriptions:
