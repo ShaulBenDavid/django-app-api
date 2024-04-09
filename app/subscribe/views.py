@@ -1,3 +1,4 @@
+from django.utils import timezone
 from drf_spectacular.utils import extend_schema, OpenApiParameter
 from drf_spectacular.types import OpenApiTypes
 from rest_framework.permissions import IsAuthenticated
@@ -7,6 +8,7 @@ from rest_framework_simplejwt.authentication import JWTAuthentication
 from rest_framework import status
 from core.models import Subscription, UserSubscriptionCollection
 from .utils import get_youtube_subscriptions, transform_subscriptions
+from .serializers import SubscriptionSerializer
 
 
 class SubscriptionsView(APIView):
@@ -41,14 +43,22 @@ class SubscriptionsView(APIView):
             )
 
         try:
+            user_subscription_list, created = UserSubscriptionCollection.objects.update_or_create(
+                user=request.user.profile,
+                defaults={'last_data_sync': timezone.now()}
+            )
+
+            current_month = timezone.now().month
+            last_sync_month = user_subscription_list.last_data_sync.month
+            # We sync data from YouTube only once a month
+            if current_month == last_sync_month and not created:
+                serializer = SubscriptionSerializer(user_subscription_list.subscriptions.all(), many=True)
+                return Response({"subscriptions": serializer.data})
+
             subscriptions = get_youtube_subscriptions(google_token)
             transformed_subscriptions = transform_subscriptions(subscriptions)
 
-            user_subscription_list, _ = (
-                UserSubscriptionCollection.objects.get_or_create(
-                    user=request.user.profile
-                )
-            )
+
             # If Subscription not already exist in user list we will create and save
             for subscription_data in transformed_subscriptions:
                 existing_subscriptions = user_subscription_list.subscriptions.filter(
