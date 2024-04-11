@@ -29,6 +29,7 @@ class SubscriptionsView(APIView):
                 required=True,
             )
         ],
+        responses={200: SubscriptionSerializer(many=True)},
     )
     def get(self, request):
         """
@@ -57,7 +58,7 @@ class SubscriptionsView(APIView):
                 serializer = SubscriptionSerializer(
                     user_subscription_list.subscriptions.all(), many=True
                 )
-                return Response({"subscriptions": serializer.data})
+                return Response({"subscriptions": serializer.data, last_sync_month: last_sync_month})
 
             subscriptions = get_youtube_subscriptions(google_token)
             transformed_subscriptions = transform_subscriptions(subscriptions)
@@ -79,7 +80,7 @@ class SubscriptionsView(APIView):
                     )
                     user_subscription_list.subscriptions.add(subscription)
 
-            return Response({"subscriptions": transformed_subscriptions})
+            return Response({"subscriptions": transformed_subscriptions, "last_sync_month": last_sync_month})
 
         except Exception as e:
             return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
