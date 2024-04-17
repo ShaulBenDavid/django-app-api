@@ -8,7 +8,6 @@ from rest_framework_simplejwt.authentication import JWTAuthentication
 from rest_framework import status
 from core.models import Subscription, UserSubscriptionCollection
 from .utils import get_youtube_subscriptions, transform_subscriptions
-from .serializers import SubscriptionSerializer
 
 
 class SubscriptionsView(APIView):
@@ -29,7 +28,7 @@ class SubscriptionsView(APIView):
                 required=True,
             )
         ],
-        responses={200: SubscriptionSerializer(many=True)},
+        responses={200: {"subscriptions_count": OpenApiTypes.INT}},
     )
     def get(self, request):
         """
@@ -55,12 +54,10 @@ class SubscriptionsView(APIView):
             last_sync_month = user_subscription_list.last_data_sync.month
             # We sync data from YouTube only once a month
             if current_month == last_sync_month and not created:
-                serializer = SubscriptionSerializer(
-                    user_subscription_list.subscriptions.all(), many=True
-                )
+                subscriptions_count = user_subscription_list.subscriptions.count()
                 return Response(
                     {
-                        "subscriptions": serializer.data,
+                        "subscriptions_count": subscriptions_count,
                         "last_sync_date": user_subscription_list.last_data_sync,
                     }
                 )
@@ -85,9 +82,11 @@ class SubscriptionsView(APIView):
                     )
                     user_subscription_list.subscriptions.add(subscription)
 
+            subscriptions_count = user_subscription_list.subscriptions.count()
+
             return Response(
                 {
-                    "subscriptions": transformed_subscriptions,
+                    "subscriptions_count": subscriptions_count,
                     "last_sync_date": user_subscription_list.last_data_sync,
                 }
             )
