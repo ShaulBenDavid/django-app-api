@@ -23,7 +23,7 @@ class Profile(models.Model):
     image_url = models.URLField(null=True, blank=True)
 
     def __str__(self):
-        return str(self.username)
+        return self.username
 
 
 ## USER Subscription list
@@ -34,7 +34,7 @@ class UserSubscriptionCollection(models.Model):
     last_data_sync = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
-        return self.user
+        return str(self.user)
 
 
 class Group(models.Model):

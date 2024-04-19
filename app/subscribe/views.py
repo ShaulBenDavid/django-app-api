@@ -5,8 +5,10 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework_simplejwt.authentication import JWTAuthentication
-from rest_framework import status
+from rest_framework import status, generics
 from core.models import Subscription, UserSubscriptionCollection
+from core.utils.pagination import StandardResultsSetPagination
+from .serializers import SubscriptionSerializer
 from .utils import get_youtube_subscriptions, transform_subscriptions
 
 
@@ -22,13 +24,13 @@ class SubscriptionsView(APIView):
     @extend_schema(
         parameters=[
             OpenApiParameter(
-                name="X-Google-Token",
-                type=OpenApiTypes.STR,
+                "X-Google-Token",
+                OpenApiTypes.STR,
                 description="Google token",
                 required=True,
+                location=OpenApiParameter.HEADER,
             )
         ],
-        responses={200: {"subscriptions_count": OpenApiTypes.INT}},
     )
     def get(self, request):
         """
@@ -93,3 +95,22 @@ class SubscriptionsView(APIView):
 
         except Exception as e:
             return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
+
+
+class SubscriptionsListView(generics.ListAPIView):
+    """
+    SubscriptionsListView - return subscription list
+    * Have pagination.
+    """
+
+    authentication_classes = [JWTAuthentication]
+    permission_classes = [IsAuthenticated]
+    queryset = Subscription.objects.all()
+    serializer_class = SubscriptionSerializer
+    pagination_class = StandardResultsSetPagination
+
+    def get_queryset(self):
+        # Filter subscriptions based on the authenticated user
+        return Subscription.objects.filter(
+            users_list=self.request.user.profile.user_subscription_list
+        )
