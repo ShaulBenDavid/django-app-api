@@ -48,7 +48,6 @@ class SubscriptionsView(APIView):
             user_subscription_list, created = (
                 UserSubscriptionCollection.objects.update_or_create(
                     user=request.user.profile,
-                    defaults={"last_data_sync": timezone.now()},
                 )
             )
 
@@ -85,6 +84,8 @@ class SubscriptionsView(APIView):
                     user_subscription_list.subscriptions.add(subscription)
 
             subscriptions_count = user_subscription_list.subscriptions.count()
+            user_subscription_list.last_data_sync = timezone.now()
+            user_subscription_list.save()
 
             return Response(
                 {
