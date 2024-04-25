@@ -17,9 +17,11 @@ class StandardResultsSetPagination(PageNumberPagination):
         if self.page.has_previous():
             previous_page_number = self.page.previous_page_number()
 
-        return Response({
-            'next': next_page_number,
-            'previous': previous_page_number,
-            'count': self.page.paginator.count,
-            'results': data
-        })
+        return Response(
+            {
+                "next": next_page_number,
+                "previous": previous_page_number,
+                "count": self.page.paginator.count,
+                "results": data,
+            }
+        )

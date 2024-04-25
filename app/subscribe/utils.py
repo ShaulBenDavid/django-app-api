@@ -14,7 +14,7 @@ def get_youtube_subscriptions(access_token):
             "mine": True,
             "key": settings.GOOGLE_API_KEY,
             "maxResults": 50,
-            "pageToken": page_token
+            "pageToken": page_token,
         }
         headers = {"Authorization": f"Bearer {access_token}"}
 

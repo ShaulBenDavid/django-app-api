@@ -4,7 +4,7 @@ from rest_framework.routers import DefaultRouter
 from . import views
 
 router = DefaultRouter()
-router.register('groups', views.GroupViewSet)
+router.register("groups", views.GroupViewSet)
 
 app_name = "subscribe"
 
@@ -13,5 +13,5 @@ urlpatterns = [
     path(
         "list/", views.SubscriptionsListView.as_view(), name="subscriptions-list-view"
     ),
-    path('', include(router.urls)),
+    path("", include(router.urls)),
 ]

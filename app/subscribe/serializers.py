@@ -13,7 +13,7 @@ class GroupSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Group
-        fields = ['id', 'title', 'description', 'subscription_count']
+        fields = ["id", "title", "description", "subscription_count"]
 
     def get_subscription_count(self, obj):
         return obj.subscriptions.count()

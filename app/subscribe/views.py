@@ -119,14 +119,19 @@ class SubscriptionsListView(generics.ListAPIView):
 
 class GroupViewSet(viewsets.ModelViewSet):
     """
-     GroupViewSer - return Group items
-     """
+    GroupViewSer - return Group items
+    """
+
     authentication_classes = [JWTAuthentication]
     permission_classes = [IsAuthenticated]
     queryset = Group.objects.all()
     serializer_class = GroupSerializer
 
     def get_queryset(self):
-        return self.queryset.filter(
-            user_list=self.request.user.profile.user_subscription_list
-        ).order_by('-id').distinct()
+        return (
+            self.queryset.filter(
+                user_list=self.request.user.profile.user_subscription_list
+            )
+            .order_by("-id")
+            .distinct()
+        )
