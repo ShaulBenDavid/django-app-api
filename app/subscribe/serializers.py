@@ -9,6 +9,11 @@ class SubscriptionSerializer(serializers.ModelSerializer):
 
 
 class GroupSerializer(serializers.ModelSerializer):
+    subscription_count = serializers.SerializerMethodField()
+
     class Meta:
         model = Group
-        fields = '__all__'
+        fields = ['id', 'title', 'description', 'subscription_count']
+
+    def get_subscription_count(self, obj):
+        return obj.subscriptions.count()
