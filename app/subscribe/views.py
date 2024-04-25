@@ -5,10 +5,10 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework_simplejwt.authentication import JWTAuthentication
-from rest_framework import status, generics
-from core.models import Subscription, UserSubscriptionCollection
+from rest_framework import status, generics, viewsets
+from core.models import Subscription, UserSubscriptionCollection, Group
 from core.utils.pagination import StandardResultsSetPagination
-from .serializers import SubscriptionSerializer
+from .serializers import SubscriptionSerializer, GroupSerializer
 from .utils import get_youtube_subscriptions, transform_subscriptions
 
 
@@ -115,3 +115,18 @@ class SubscriptionsListView(generics.ListAPIView):
         return Subscription.objects.filter(
             users_list=self.request.user.profile.user_subscription_list
         )
+
+
+class GroupViewSet(viewsets.ModelViewSet):
+    """
+     GroupViewSer - return Group items
+     """
+    authentication_classes = [JWTAuthentication]
+    permission_classes = [IsAuthenticated]
+    queryset = Group.objects.all()
+    serializer_class = GroupSerializer
+
+    def get_queryset(self):
+        return self.queryset.filter(
+            user_list=self.request.user.profile.user_subscription_list
+        ).order_by('-id').distinct()
