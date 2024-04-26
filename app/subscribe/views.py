@@ -5,7 +5,7 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework_simplejwt.authentication import JWTAuthentication
-from rest_framework import status, generics, viewsets
+from rest_framework import status, generics, viewsets, filters
 from core.models import Subscription, UserSubscriptionCollection, Group
 from core.utils.pagination import StandardResultsSetPagination
 from .serializers import SubscriptionSerializer, GroupSerializer
@@ -109,6 +109,8 @@ class SubscriptionsListView(generics.ListAPIView):
     queryset = Subscription.objects.all()
     serializer_class = SubscriptionSerializer
     pagination_class = StandardResultsSetPagination
+    filter_backends = [filters.OrderingFilter]
+    ordering_fields = ["title"]
 
     def get_queryset(self):
         # Filter subscriptions based on the authenticated user

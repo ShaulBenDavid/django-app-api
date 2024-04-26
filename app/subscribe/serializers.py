@@ -1,11 +1,12 @@
 from rest_framework import serializers
-from core.models import Subscription, Group
+from core.models import Subscription, Group, UserSubscriptionCollection
 
 
 class SubscriptionSerializer(serializers.ModelSerializer):
     class Meta:
         model = Subscription
-        fields = ["title", "description", "channel_id", "image_url"]
+        fields = ["id", "title", "description", "channel_id", "image_url"]
+        read_only_fields = ["id"]
 
 
 class GroupSerializer(serializers.ModelSerializer):
@@ -14,6 +15,20 @@ class GroupSerializer(serializers.ModelSerializer):
     class Meta:
         model = Group
         fields = ["id", "title", "description", "subscription_count"]
+        read_only_fields = ["id", "subscription_count"]
 
     def get_subscription_count(self, obj):
         return obj.subscriptions.count()
+
+    def create(self, validated_data):
+        """Create a group."""
+        user_profile = self.context["request"].user.profile
+
+        user_subscription_collection, created = (
+            UserSubscriptionCollection.objects.get_or_create(user=user_profile)
+        )
+
+        validated_data["user_list"] = user_subscription_collection
+        group_instance = Group.objects.create(**validated_data)
+
+        return group_instance
