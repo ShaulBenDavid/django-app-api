@@ -129,6 +129,21 @@ class GroupViewSet(viewsets.ModelViewSet):
     queryset = Group.objects.all()
     serializer_class = GroupSerializer
 
+    def create(self, request, *args, **kwargs):
+        try:
+            return super().create(request, *args, **kwargs)
+        except Exception as e:
+            if 'unique constraint' in str(e):
+                return Response(
+                    {"error": "A group with this combination of fields already exists."},
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+            else:
+                return Response(
+                    {"error": "Failed to create the group."},
+                    status=status.HTTP_500_INTERNAL_SERVER_ERROR
+                )
+
     def get_queryset(self):
         return (
             self.queryset.filter(
