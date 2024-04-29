@@ -1,6 +1,8 @@
 from django.utils import timezone
 from drf_spectacular.utils import extend_schema, OpenApiParameter
 from drf_spectacular.types import OpenApiTypes
+from rest_framework.decorators import api_view, permission_classes, authentication_classes
+from rest_framework.generics import get_object_or_404
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.views import APIView
 from rest_framework.response import Response
@@ -109,7 +111,8 @@ class SubscriptionsListView(generics.ListAPIView):
     queryset = Subscription.objects.all()
     serializer_class = SubscriptionSerializer
     pagination_class = StandardResultsSetPagination
-    filter_backends = [filters.OrderingFilter]
+    filter_backends = [filters.OrderingFilter, filters.SearchFilter]
+    search_fields = ["title"]
     ordering_fields = ["title"]
 
     def get_queryset(self):
@@ -130,6 +133,7 @@ class GroupViewSet(viewsets.ModelViewSet):
     serializer_class = GroupSerializer
 
     def create(self, request, *args, **kwargs):
+        # Handle unique errors
         try:
             return super().create(request, *args, **kwargs)
         except Exception as e:
@@ -152,3 +156,15 @@ class GroupViewSet(viewsets.ModelViewSet):
             .order_by("-id")
             .distinct()
         )
+
+
+@api_view(['POST'])
+@authentication_classes([JWTAuthentication])
+@permission_classes([IsAuthenticated])
+def add_subscription_to_group(request, group_id):
+    """
+    add_subscription_to_group - update user group with subscription
+    """
+    group = get_object_or_404(Group, pk=group_id)
+
+
