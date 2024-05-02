@@ -23,7 +23,4 @@ class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
     @classmethod
     def get_token(cls, user, **kwargs):
         token = super().get_token(user)
-        # Google access token - for accessing the YouTube data
-        # google_token = kwargs.get("google_token")
-        # token["google_token"] = google_token
         return token

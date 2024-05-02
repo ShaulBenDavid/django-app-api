@@ -13,7 +13,10 @@ urlpatterns = [
     path(
         "list/", views.SubscriptionsListView.as_view(), name="subscriptions-list-view"
     ),
-    path('groups/<int:group_id>/add-subscription/', views.add_subscription_to_group, name='add_subscription_to_group'),
+    path(
+        "groups/<int:group_id>/add-subscription/",
+        views.add_subscription_to_group,
+        name="add_subscription_to_group",
+    ),
     path("", include(router.urls)),
-
 ]

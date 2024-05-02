@@ -1,7 +1,11 @@
 from django.utils import timezone
 from drf_spectacular.utils import extend_schema, OpenApiParameter
 from drf_spectacular.types import OpenApiTypes
-from rest_framework.decorators import api_view, permission_classes, authentication_classes
+from rest_framework.decorators import (
+    api_view,
+    permission_classes,
+    authentication_classes,
+)
 from rest_framework.generics import get_object_or_404
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.views import APIView
@@ -137,15 +141,17 @@ class GroupViewSet(viewsets.ModelViewSet):
         try:
             return super().create(request, *args, **kwargs)
         except Exception as e:
-            if 'unique constraint' in str(e):
+            if "unique constraint" in str(e):
                 return Response(
-                    {"error": "A group with this combination of fields already exists."},
-                    status=status.HTTP_400_BAD_REQUEST
+                    {
+                        "error": "A group with this combination of fields already exists."
+                    },
+                    status=status.HTTP_400_BAD_REQUEST,
                 )
             else:
                 return Response(
                     {"error": "Failed to create the group."},
-                    status=status.HTTP_500_INTERNAL_SERVER_ERROR
+                    status=status.HTTP_500_INTERNAL_SERVER_ERROR,
                 )
 
     def get_queryset(self):
@@ -158,7 +164,7 @@ class GroupViewSet(viewsets.ModelViewSet):
         )
 
 
-@api_view(['POST'])
+@api_view(["POST"])
 @authentication_classes([JWTAuthentication])
 @permission_classes([IsAuthenticated])
 def add_subscription_to_group(request, group_id):
@@ -166,16 +172,20 @@ def add_subscription_to_group(request, group_id):
     add_subscription_to_group - update user group with subscription
     """
     group = get_object_or_404(Group, pk=group_id)
-    subscription_id = request.data.get('subscription_id')
+    subscription_id = request.data.get("subscription_id")
 
     if not subscription_id:
-        return Response({'error': 'subscription_id is required'}, status=status.HTTP_400_BAD_REQUEST)
-
+        return Response(
+            {"error": "subscription_id is required"}, status=status.HTTP_400_BAD_REQUEST
+        )
 
     subscription = get_object_or_404(Subscription, pk=subscription_id)
     if subscription:
         group.subscriptions.add(subscription)
+        serializer = SubscriptionSerializer(subscription)
+        return Response(serializer.data, status=status.HTTP_200_OK)
 
-        return Response('subscription', status=status.HTTP_200_OK)
-
-    return Response('1', status=status.HTTP_400_BAD_REQUEST)
+    return Response(
+        {"error": "Failed to add subscription to a group."},
+        status=status.HTTP_400_BAD_REQUEST,
+    )
