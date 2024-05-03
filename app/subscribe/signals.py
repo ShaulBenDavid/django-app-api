@@ -10,8 +10,8 @@ def update_subscriptions_group(sender, instance, action, reverse, model, **kwarg
         subscription_id = (
             instance.subscriptions.through.objects.last()
         ).subscription_id
-        user_groups = (
-            instance.subscriptions.through.objects.last().group.user_list.user_groups.all()
+        user_groups = instance.subscriptions.through.objects.last().group.user_list.user_groups.filter(
+            subscriptions=subscription_id
         )
         subscription = model.objects.get(pk=subscription_id)
 
