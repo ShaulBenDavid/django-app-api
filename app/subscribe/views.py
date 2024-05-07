@@ -1,4 +1,6 @@
 from django.utils import timezone
+import django_filters.rest_framework
+from django.db.models import Q
 from drf_spectacular.utils import extend_schema, OpenApiParameter
 from drf_spectacular.types import OpenApiTypes
 from rest_framework.decorators import (
@@ -115,9 +117,14 @@ class SubscriptionsListView(generics.ListAPIView):
     queryset = Subscription.objects.all()
     serializer_class = SubscriptionSerializer
     pagination_class = StandardResultsSetPagination
-    filter_backends = [filters.OrderingFilter, filters.SearchFilter]
+    filter_backends = [
+        filters.OrderingFilter,
+        filters.SearchFilter,
+        django_filters.rest_framework.DjangoFilterBackend,
+    ]
     search_fields = ["title"]
     ordering_fields = ["title"]
+    filterset_fields = ["group"]
 
     def get_queryset(self):
         # Filter subscriptions based on the authenticated user
