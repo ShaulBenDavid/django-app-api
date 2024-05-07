@@ -1,6 +1,6 @@
 from django.utils import timezone
-import django_filters.rest_framework
-from django.db.models import Q
+from django_filters.rest_framework import DjangoFilterBackend
+from .filters import SubscriptionFilter
 from drf_spectacular.utils import extend_schema, OpenApiParameter
 from drf_spectacular.types import OpenApiTypes
 from rest_framework.decorators import (
@@ -109,7 +109,8 @@ class SubscriptionsView(APIView):
 class SubscriptionsListView(generics.ListAPIView):
     """
     SubscriptionsListView - return subscription list
-    * Have pagination.
+    * Supports filtering by specific group, 'ungroup', or 'all'.
+    * Supports pagination.
     """
 
     authentication_classes = [JWTAuthentication]
@@ -120,16 +121,16 @@ class SubscriptionsListView(generics.ListAPIView):
     filter_backends = [
         filters.OrderingFilter,
         filters.SearchFilter,
-        django_filters.rest_framework.DjangoFilterBackend,
+        DjangoFilterBackend,
     ]
     search_fields = ["title"]
     ordering_fields = ["title"]
-    filterset_fields = ["group"]
+    filterset_class = SubscriptionFilter
 
     def get_queryset(self):
         # Filter subscriptions based on the authenticated user
         return Subscription.objects.filter(
-            users_list=self.request.user.profile.user_subscription_list
+            users_list=self.request.user.profile.user_subscription_list,
         )
 
 
