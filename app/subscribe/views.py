@@ -188,7 +188,9 @@ def add_subscription_to_group(request, group_id):
         )
 
     subscription = get_object_or_404(Subscription, pk=subscription_id)
-    if subscription:
+    current_group = subscription.group.first()
+
+    if subscription and group != current_group:
         group.subscriptions.add(subscription)
         serializer = SubscriptionSerializer(subscription)
         return Response(serializer.data, status=status.HTTP_200_OK)

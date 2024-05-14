@@ -17,5 +17,6 @@ def update_subscriptions_group(sender, instance, action, reverse, model, **kwarg
 
         # Remove subscription from user's previous groups
         previous_groups = user_groups.exclude(pk=instance.pk)
-        for prev_group in previous_groups:
-            prev_group.subscriptions.remove(subscription)
+        if len(previous_groups):
+            for prev_group in previous_groups:
+                prev_group.subscriptions.remove(subscription)
