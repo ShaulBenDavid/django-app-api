@@ -188,7 +188,9 @@ def add_subscription_to_group(request, group_id):
         )
 
     subscription = get_object_or_404(Subscription, pk=subscription_id)
-    current_group = subscription.group.first()
+    current_group = subscription.group.filter(
+        user_list=request.user.profile.user_subscription_list
+    ).first()
 
     if subscription and group != current_group:
         group.subscriptions.add(subscription)
