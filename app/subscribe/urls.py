@@ -18,5 +18,10 @@ urlpatterns = [
         views.add_subscription_to_group,
         name="add_subscription_to_group",
     ),
+    path(
+        "<int:subscription_id>/ungroup-subscription/",
+        views.remove_subscription_from_group,
+        name="remove_subscription_from_group",
+    ),
     path("", include(router.urls)),
 ]

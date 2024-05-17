@@ -201,3 +201,31 @@ def add_subscription_to_group(request, group_id):
         {"error": "Failed to add subscription to a group."},
         status=status.HTTP_400_BAD_REQUEST,
     )
+
+
+@api_view(["DELETE"])
+@authentication_classes([JWTAuthentication])
+@permission_classes([IsAuthenticated])
+def remove_subscription_from_group(request, subscription_id):
+    """
+    remove_subscription_from_group - ungroup subscriptions
+    """
+    subscription = get_object_or_404(Subscription, pk=subscription_id)
+
+    group = subscription.group.filter(
+        user_list=request.user.profile.user_subscription_list
+    ).first()
+
+    if group:
+        group.subscriptions.remove(subscription)
+        return Response(
+            {"message": "Subscription removed from the group."},
+            status=status.HTTP_204_NO_CONTENT,
+        )
+
+    return Response(
+        {
+            "error": "Subscription does not belong to any group associated with the user."
+        },
+        status=status.HTTP_400_BAD_REQUEST,
+    )
