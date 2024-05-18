@@ -73,14 +73,27 @@ class SubscriptionsView(APIView):
 
             subscriptions = get_youtube_subscriptions(google_token)
             transformed_subscriptions = transform_subscriptions(subscriptions)
+            existing_subscriptions = user_subscription_list.subscriptions.all()
+            # remove subscription from user data
+            subscriptions_to_remove = existing_subscriptions.exclude(
+                channel_id__in=[sub["channel_id"] for sub in transformed_subscriptions]
+            )
+            user_subscription_list.subscriptions.remove(*subscriptions_to_remove)
 
-            # If Subscription not already exist in user list we will create and save
+            for subscription_to_remove in subscriptions_to_remove:
+                group = subscription_to_remove.group.filter(
+                    user_list=user_subscription_list
+                ).first()
+                group.subscriptions.remove(subscription_to_remove)
+
+            # Sync the fetched subscriptions with the user's subscriptions
             for subscription_data in transformed_subscriptions:
-                existing_subscriptions = user_subscription_list.subscriptions.filter(
+                existing_subscription = existing_subscriptions.filter(
                     channel_id=subscription_data["channel_id"]
-                )
+                ).first()
 
-                if not existing_subscriptions.exists():
+                if not existing_subscription:
+                    # Create a new subscription if it doesn't exist
                     subscription, _ = Subscription.objects.get_or_create(
                         channel_id=subscription_data["channel_id"],
                         defaults={
