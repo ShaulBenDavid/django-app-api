@@ -14,8 +14,17 @@ class CustomUserAdmin(UserAdmin):
     )
 
 
+class GroupInline(admin.StackedInline):
+    model = Group
+    extra = 1
+
+
+class UserListAdmin(admin.ModelAdmin):
+    inlines = [GroupInline]
+
+
 admin.site.register(User, CustomUserAdmin)
 admin.site.register(Profile)
 admin.site.register(Subscription)
-admin.site.register(UserSubscriptionCollection)
+admin.site.register(UserSubscriptionCollection, UserListAdmin)
 admin.site.register(Group)
