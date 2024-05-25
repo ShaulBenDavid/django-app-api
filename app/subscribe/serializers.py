@@ -33,3 +33,7 @@ class GroupSerializer(serializers.ModelSerializer):
         group_instance = Group.objects.create(**validated_data)
 
         return group_instance
+
+
+class AddSubscriptionToGroupSerializer(serializers.Serializer):
+    subscription_id = serializers.IntegerField(required=True)

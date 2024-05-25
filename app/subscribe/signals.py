@@ -1,7 +1,14 @@
-from django.db.models.signals import m2m_changed
+from django.db.models.signals import m2m_changed, pre_save
 from django.dispatch import receiver
-
+from django.core.exceptions import ValidationError
 from core.models import Group
+
+
+@receiver(pre_save, sender=Group)
+def validate_group_limit(sender, instance, **kwargs):
+    user_subscription_collection = instance.user_list
+    if user_subscription_collection.user_groups.count() >= 10:
+        raise ValidationError("You cannot create more than 10 groups.")
 
 
 @receiver(m2m_changed, sender=Group.subscriptions.through)

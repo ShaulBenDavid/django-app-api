@@ -1,7 +1,8 @@
 from django.utils import timezone
 from django_filters.rest_framework import DjangoFilterBackend
+from django.core.exceptions import ValidationError
 from .filters import SubscriptionFilter
-from drf_spectacular.utils import extend_schema, OpenApiParameter
+from drf_spectacular.utils import extend_schema, OpenApiParameter, OpenApiResponse
 from drf_spectacular.types import OpenApiTypes
 from rest_framework.decorators import (
     api_view,
@@ -16,7 +17,11 @@ from rest_framework_simplejwt.authentication import JWTAuthentication
 from rest_framework import status, generics, viewsets, filters
 from core.models import Subscription, UserSubscriptionCollection, Group
 from core.utils.pagination import StandardResultsSetPagination
-from .serializers import SubscriptionSerializer, GroupSerializer
+from .serializers import (
+    SubscriptionSerializer,
+    GroupSerializer,
+    AddSubscriptionToGroupSerializer,
+)
 from .utils import get_youtube_subscriptions, transform_subscriptions
 
 
@@ -161,7 +166,14 @@ class GroupViewSet(viewsets.ModelViewSet):
         # Handle unique errors
         try:
             return super().create(request, *args, **kwargs)
+        except ValidationError as e:
+            return Response(
+                {"error": e.messages[0]},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
         except Exception as e:
+            print(str(e))
+
             if "unique constraint" in str(e):
                 return Response(
                     {
@@ -172,7 +184,7 @@ class GroupViewSet(viewsets.ModelViewSet):
             else:
                 return Response(
                     {"error": "Failed to create the group."},
-                    status=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                    status=status.HTTP_400_BAD_REQUEST,
                 )
 
     def get_queryset(self):
@@ -185,6 +197,15 @@ class GroupViewSet(viewsets.ModelViewSet):
         )
 
 
+@extend_schema(
+    request=AddSubscriptionToGroupSerializer,
+    responses={
+        200: SubscriptionSerializer,
+        400: OpenApiResponse(
+            description="Failed to add subscription to a group or validation errors"
+        ),
+    },
+)
 @api_view(["POST"])
 @authentication_classes([JWTAuthentication])
 @permission_classes([IsAuthenticated])
@@ -192,15 +213,15 @@ def add_subscription_to_group(request, group_id):
     """
     add_subscription_to_group - update user group with subscription
     """
+    serializer = AddSubscriptionToGroupSerializer(data=request.data)
+    if not serializer.is_valid():
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    subscription_id = serializer.validated_data["subscription_id"]
+
     group = get_object_or_404(Group, pk=group_id)
-    subscription_id = request.data.get("subscription_id")
-
-    if not subscription_id:
-        return Response(
-            {"error": "subscription_id is required"}, status=status.HTTP_400_BAD_REQUEST
-        )
-
     subscription = get_object_or_404(Subscription, pk=subscription_id)
+
     current_group = subscription.group.filter(
         user_list=request.user.profile.user_subscription_list
     ).first()
