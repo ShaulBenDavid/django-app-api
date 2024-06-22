@@ -5,6 +5,8 @@ services:
     build:
       context: .
     restart: always
+    volumes:
+      - static-data:/vol/web
     environment:
       - DB_HOST=db
       - DB_NAME=${DB_NAME}
