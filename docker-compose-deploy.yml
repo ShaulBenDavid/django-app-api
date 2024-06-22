@@ -14,6 +14,8 @@ services:
       - ALLOWED_HOSTS=${DJANGO_ALLOWED_HOSTS}
     depends_on:
       - db
+    ports:
+      - 8000:8000
 
   db:
     image: postgres:13-alpine
