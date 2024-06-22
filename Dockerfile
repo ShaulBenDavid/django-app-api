@@ -13,9 +13,9 @@ EXPOSE 8000
 ARG DEV=false
 RUN python -m venv /py && \
     /py/bin/pip install --upgrade pip && \
-    apk add --update --no-cache postgresql-client && \
+    apk add --update --no-cache postgresql-client jpeg-dev && \
     apk add --update --no-cache --virtual .tmp-build-deps \
-        build-base postgresql-dev musl-dev linux-headers && \
+        build-base postgresql-dev musl-dev zlib zlib-dev linux-headers && \
     /py/bin/pip install -r /tmp/requirements.txt && \
     if [ $DEV = "true" ]; \
         then /py/bin/pip install -r /tmp/requirements.dev.txt ; \
@@ -29,7 +29,6 @@ RUN python -m venv /py && \
     mkdir -p /vol/web/media && \
     mkdir -p /vol/web/static && \
     chown -R django-user:django-user /vol && \
-    # 755 means that you can do any change to that directory
     chmod -R 755 /vol && \
     chmod -R +x /scripts
 
