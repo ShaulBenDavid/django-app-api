@@ -185,13 +185,8 @@ SIMPLE_JWT = {
 
 CORS_ALLOWED_ORIGINS = [
     "http://localhost:3000",
+    "https://my-tubes.com",
 ]
-CORS_ALLOWED_ORIGINS.extend(
-    filter(
-        None,
-        os.environ.get('ALLOWED_HOSTS', '').split(','),
-    )
-)
 
 CORS_ALLOW_HEADERS = [
     "Accept",
