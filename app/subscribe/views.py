@@ -172,8 +172,6 @@ class GroupViewSet(viewsets.ModelViewSet):
                 status=status.HTTP_400_BAD_REQUEST,
             )
         except Exception as e:
-            print(str(e))
-
             if "unique constraint" in str(e):
                 return Response(
                     {
@@ -181,11 +179,10 @@ class GroupViewSet(viewsets.ModelViewSet):
                     },
                     status=status.HTTP_400_BAD_REQUEST,
                 )
-            else:
-                return Response(
-                    {"error": "Failed to create the group."},
-                    status=status.HTTP_400_BAD_REQUEST,
-                )
+            return Response(
+                {"error": "Failed to create the group."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
 
     def get_queryset(self):
         return (
