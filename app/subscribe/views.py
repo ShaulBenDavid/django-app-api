@@ -22,7 +22,8 @@ from .serializers import (
     GroupSerializer,
     AddSubscriptionToGroupSerializer,
 )
-from .utils import get_youtube_subscriptions, transform_subscriptions
+from .utils import get_youtube_subscriptions, transform_subscriptions, get_upload_playlist_ids, get_latest_uploads, \
+    get_video_details
 
 
 class SubscriptionsView(APIView):
@@ -76,8 +77,11 @@ class SubscriptionsView(APIView):
                     }
                 )
 
-            subscriptions = get_youtube_subscriptions(google_token)
-            transformed_subscriptions = transform_subscriptions(subscriptions)
+            subscriptions = get_youtube_subscriptions(access_token=google_token)
+            transformed_subscriptions, _ = transform_subscriptions(subscriptions=subscriptions)
+            # subscriptions_playlist_ids = get_upload_playlist_ids(access_token=google_token, channel_ids=channel_ids)
+            # latest_videos = get_latest_uploads(access_token=google_token, playlist_ids=subscriptions_playlist_ids)
+            # video_details = get_video_details(access_token=google_token, video_ids=latest_videos)
             existing_subscriptions = user_subscription_list.subscriptions.all()
             # remove subscription from user data
             subscriptions_to_remove = existing_subscriptions.exclude(
@@ -133,7 +137,6 @@ class SubscriptionsListView(generics.ListAPIView):
 
     authentication_classes = [JWTAuthentication]
     permission_classes = [IsAuthenticated]
-    queryset = Subscription.objects.all()
     serializer_class = SubscriptionSerializer
     pagination_class = StandardResultsSetPagination
     filter_backends = [
@@ -149,7 +152,7 @@ class SubscriptionsListView(generics.ListAPIView):
         # Filter subscriptions based on the authenticated user
         return Subscription.objects.filter(
             users_list=self.request.user.profile.user_subscription_list,
-        )
+        ).order_by('id')
 
 
 class GroupViewSet(viewsets.ModelViewSet):
