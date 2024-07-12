@@ -63,5 +63,6 @@ services:
 volumes:
   postgres-data:
   static-data:
+  certbot-web:
   proxy-dhparams:
   certbot-certs:
