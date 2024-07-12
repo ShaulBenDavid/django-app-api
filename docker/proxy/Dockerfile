@@ -9,7 +9,9 @@ ENV APP_PORT=9000
 USER root
 
 RUN apk add --no-cache openssl bash
-RUN chmod +x /run.sh
+RUN mkdir -p /vol/static && \
+    chmod 755 /vol/static && \
+    chmod +x /run.sh
 
 VOLUME /vol/static
 VOLUME /vol/www
