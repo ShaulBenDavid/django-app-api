@@ -36,8 +36,9 @@ def google_get_tokens(*, code: str, redirect_uri: str) -> Tuple[str, str]:
         if not response.ok:
             raise ValidationError(response.json())
 
-        access_token = response.json()["access_token"]
-        refresh_token = response.json()["refresh_token"]
+        response_data = response.json()
+        access_token = response_data.get("access_token")
+        refresh_token = response_data.get("refresh_token", None)
 
         return access_token, refresh_token
 
