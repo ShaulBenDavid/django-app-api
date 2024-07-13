@@ -26,6 +26,7 @@ def google_get_tokens(*, code: str, redirect_uri: str) -> Tuple[str, str]:
         "client_id": settings.GOOGLE_OAUTH2_CLIENT_ID,
         "client_secret": settings.GOOGLE_OAUTH2_CLIENT_SECRET,
         "redirect_uri": redirect_uri,
+        "access_type": "offline",
         "grant_type": "authorization_code",
     }
 
