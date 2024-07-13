@@ -43,6 +43,9 @@ def google_get_tokens(*, code: str, redirect_uri: str) -> Tuple[str, str]:
     except requests.exceptions.RequestException as e:
         # Handle requests-related errors
         raise ValidationError(f"Error during token exchange: {str(e)}")
+    except Exception as e:
+        # Handle other unexpected errors
+        raise ValidationError(f"Unexpected error: {str(e)}")
 
 def google_refresh_access_token(refresh_token: str) -> str:
     data = {
