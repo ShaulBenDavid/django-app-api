@@ -29,16 +29,20 @@ def google_get_tokens(*, code: str, redirect_uri: str) -> Tuple[str, str]:
         "grant_type": "authorization_code",
     }
 
-    response = requests.post(GOOGLE_ACCESS_TOKEN_OBTAIN_URL, data=data)
+    try:
+        response = requests.post(GOOGLE_ACCESS_TOKEN_OBTAIN_URL, data=data)
 
-    if not response.ok:
-        raise ValidationError(response.json())
+        if not response.ok:
+            raise ValidationError(response.json())
 
-    access_token = response.json()["access_token"]
-    refresh_token = response.json()["refresh_token"]
+        access_token = response.json()["access_token"]
+        refresh_token = response.json()["refresh_token"]
 
-    return access_token, refresh_token
+        return access_token, refresh_token
 
+    except requests.exceptions.RequestException as e:
+        # Handle requests-related errors
+        raise ValidationError(f"Error during token exchange: {str(e)}")
 
 def google_refresh_access_token(refresh_token: str) -> str:
     data = {
