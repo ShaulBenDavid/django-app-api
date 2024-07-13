@@ -32,7 +32,7 @@ def google_get_tokens(*, code: str, redirect_uri: str) -> Tuple[str, str]:
     response = requests.post(GOOGLE_ACCESS_TOKEN_OBTAIN_URL, data=data)
 
     if not response.ok:
-        raise ValidationError("Failed to obtain access token from Google.")
+        raise ValidationError(response.json())
 
     access_token = response.json()["access_token"]
     refresh_token = response.json()["refresh_token"]
