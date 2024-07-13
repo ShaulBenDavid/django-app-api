@@ -55,13 +55,13 @@ class GoogleLoginApi(PublicApiMixin, ApiErrorsMixin, APIView):
         code = validated_data.get("code")
         error = validated_data.get("error")
 
-        login_url = f"{settings.BASE_FRONTEND_URL}"
+        login_url = f"{settings.GOOGLE_OAUTH2_REDIRECT}"
 
         if error or not code:
             params = urlencode({"error": error})
             return redirect(f"{login_url}?{params}")
 
-        redirect_uri = f"{settings.BASE_FRONTEND_URL}/google"
+        redirect_uri = f"{settings.GOOGLE_OAUTH2_REDIRECT}/google"
         google_access_token, google_refresh_token = google_get_tokens(
             code=code, redirect_uri=redirect_uri
         )
