@@ -186,6 +186,11 @@ SIMPLE_JWT = {
 CORS_ALLOWED_ORIGINS = [
     "http://localhost:3000",
     "https://my-tubes.com",
+    "https://api-bk.my-tubes.com",
+]
+
+CSRF_TRUSTED_ORIGINS = [
+    "https://api-bk.my-tubes.com",
 ]
 
 CORS_ALLOW_HEADERS = [
