@@ -11,7 +11,7 @@ https://docs.djangoproject.com/en/4.2/ref/settings/
 """
 
 import os
-from datetime import timedelta
+from datetime import timedelta, datetime
 from pathlib import Path
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -180,7 +180,8 @@ SIMPLE_JWT = {
     "AUTH_GOOGLE_COOKIE": "google_token",
     "AUTH_COOKIE_HTTP_ONLY": True,
     "AUTH_COOKIE_SECURE": True,
-    "AUTH_COOKIE_SAMESITE": "None",
+    "AUTH_COOKIE_SAMESITE": "strict",
+    "AUTH_COOKIE_EXPIRATION": datetime.utcnow() + timedelta(days=7),
 }
 
 CORS_ALLOWED_ORIGINS = [
