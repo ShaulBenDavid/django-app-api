@@ -6,6 +6,7 @@ YOUTUBE_CHANNELS_URL = "https://www.googleapis.com/youtube/v3/channels"
 YOUTUBE_PLAYLIST_URL = "https://www.googleapis.com/youtube/v3/playlistItems"
 YOUTUBE_VIDEOS_URL = "https://www.googleapis.com/youtube/v3/videos"
 
+
 def get_youtube_subscriptions(access_token):
     subscriptions = []
     page_token = None
@@ -45,8 +46,8 @@ def get_upload_playlist_ids(access_token, channel_ids):
             "id": [],
         }
         headers = {"Authorization": f"Bearer {access_token}"}
-        chunk = channel_ids[i:i+50]
-        params['id'] = ','.join(chunk)
+        chunk = channel_ids[i : i + 50]
+        params["id"] = ",".join(chunk)
         try:
             response = requests.get(
                 url=YOUTUBE_CHANNELS_URL, params=params, headers=headers
@@ -54,18 +55,21 @@ def get_upload_playlist_ids(access_token, channel_ids):
             response.raise_for_status()
             channel_response = response.json()
 
-            for item in channel_response['items']:
-                uploads_playlist_id = item['contentDetails']['relatedPlaylists']['uploads']
+            for item in channel_response["items"]:
+                uploads_playlist_id = item["contentDetails"]["relatedPlaylists"][
+                    "uploads"
+                ]
                 playlist_ids.append(uploads_playlist_id)
         except requests.exceptions.RequestException as e:
             raise RuntimeError(f"Failed to retrieve playlist_ids: {e}")
 
     return playlist_ids
 
+
 def get_latest_uploads(access_token, playlist_ids):
     latest_videos = []
     for i in range(0, len(playlist_ids), 50):  # Process in batches of 50
-        chunk = playlist_ids[i:i+50]
+        chunk = playlist_ids[i : i + 50]
         for playlist_id in chunk:
             try:
                 params = {
@@ -80,11 +84,16 @@ def get_latest_uploads(access_token, playlist_ids):
                 )
                 response.raise_for_status()
                 playlist_response = response.json()
-                if playlist_response['items']:
-                    latest_videos.append(playlist_response['items'][0]['snippet']['resourceId']['videoId'])
+                if playlist_response["items"]:
+                    latest_videos.append(
+                        playlist_response["items"][0]["snippet"]["resourceId"][
+                            "videoId"
+                        ]
+                    )
             except requests.exceptions.RequestException as e:
                 raise RuntimeError(f"Failed to retrieve get_latest_uploads: {e}")
     return latest_videos
+
 
 def get_video_details(access_token, video_ids):
     video_details = []
@@ -92,7 +101,7 @@ def get_video_details(access_token, video_ids):
         params = {
             "part": "snippet",
             "key": settings.GOOGLE_API_KEY,
-            "id": ','.join(video_ids[i:i+50]),
+            "id": ",".join(video_ids[i : i + 50]),
         }
         headers = {"Authorization": f"Bearer {access_token}"}
         try:
@@ -101,7 +110,7 @@ def get_video_details(access_token, video_ids):
             )
             response.raise_for_status()
             video_response = response.json()
-            video_details.extend(video_response['items'])
+            video_details.extend(video_response["items"])
         except requests.exceptions.RequestException as e:
             raise RuntimeError(f"Failed to retrieve video details: {e}")
     return video_details

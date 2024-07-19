@@ -50,6 +50,7 @@ def google_get_tokens(*, code: str, redirect_uri: str) -> Tuple[str, str]:
         # Handle other unexpected errors
         raise ValidationError(f"Unexpected error: {str(e)}")
 
+
 def google_refresh_access_token(refresh_token: str) -> str:
     data = {
         "client_id": settings.GOOGLE_OAUTH2_CLIENT_ID,

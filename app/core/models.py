@@ -36,6 +36,7 @@ class UserSubscriptionCollection(models.Model):
     def __str__(self):
         return str(self.user)
 
+
 class Group(models.Model):
     title = models.CharField(max_length=100)
     description = models.TextField(max_length=255, null=True, blank=True)

@@ -21,8 +21,8 @@ class GroupInline(admin.StackedInline):
 
 class UserListAdmin(admin.ModelAdmin):
     all_fields = ("user", "last_data_sync")
-    list_display = ('user', 'last_data_sync')
-    fields = ('user', 'last_data_sync')
+    list_display = ("user", "last_data_sync")
+    fields = ("user", "last_data_sync")
     inlines = [GroupInline]
 
 
