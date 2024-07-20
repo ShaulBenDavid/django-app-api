@@ -5,12 +5,12 @@ from drf_spectacular.views import (
 
 from django.contrib import admin
 from django.urls import path, include
-# from django_otp.admin import OTPAdminSite
+from django_otp.admin import OTPAdminSite
 
 from core import views as core_views
 
 
-# admin.site.__class__ = OTPAdminSite
+admin.site.__class__ = OTPAdminSite
 
 urlpatterns = [
     path("shon/", admin.site.urls),
