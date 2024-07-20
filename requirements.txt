@@ -6,4 +6,6 @@ drf-spectacular>=0.26.1,<0.27
 django-cors-headers==3.13.0
 requests==2.30.0
 django-filter>=24.1,<25
-uWSGI>=2.0.19,<2.1
+uWSGI>=2.0.19,<25
+django-otp>=0.2.7,<2.3
+qrcode>=7.4.1,<7.5
