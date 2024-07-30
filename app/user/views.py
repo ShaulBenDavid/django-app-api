@@ -85,7 +85,7 @@ class GoogleLoginApi(PublicApiMixin, ApiErrorsMixin, APIView):
             secure=settings.SIMPLE_JWT["AUTH_COOKIE_SECURE"],
             httponly=settings.SIMPLE_JWT["AUTH_COOKIE_HTTP_ONLY"],
             samesite=settings.SIMPLE_JWT["AUTH_COOKIE_SAMESITE"],
-            max_age=settings.SIMPLE_JWT["AUTH_COOKIE_MAX_AGE"]
+            max_age=settings.SIMPLE_JWT["AUTH_COOKIE_MAX_AGE"],
         )
         response.set_cookie(
             key=settings.SIMPLE_JWT["AUTH_GOOGLE_COOKIE"],
@@ -93,7 +93,7 @@ class GoogleLoginApi(PublicApiMixin, ApiErrorsMixin, APIView):
             secure=settings.SIMPLE_JWT["AUTH_COOKIE_SECURE"],
             httponly=settings.SIMPLE_JWT["AUTH_COOKIE_HTTP_ONLY"],
             samesite=settings.SIMPLE_JWT["AUTH_COOKIE_SAMESITE"],
-            max_age=settings.SIMPLE_JWT["AUTH_COOKIE_MAX_AGE"]
+            max_age=settings.SIMPLE_JWT["AUTH_COOKIE_MAX_AGE"],
         )
         return response
 

@@ -1,3 +1,4 @@
+from django.db.models import Count
 from django.utils import timezone
 from django_filters.rest_framework import DjangoFilterBackend
 from django.core.exceptions import ValidationError
@@ -144,6 +145,7 @@ class SubscriptionsListView(generics.ListAPIView):
 
     authentication_classes = [JWTAuthentication]
     permission_classes = [IsAuthenticated]
+    queryset = Subscription.objects.all()
     serializer_class = SubscriptionSerializer
     pagination_class = StandardResultsSetPagination
     filter_backends = [
@@ -156,8 +158,7 @@ class SubscriptionsListView(generics.ListAPIView):
     filterset_class = SubscriptionFilter
 
     def get_queryset(self):
-        # Filter subscriptions based on the authenticated user
-        return Subscription.objects.filter(
+        return self.queryset.filter(
             users_list=self.request.user.profile.user_subscription_list,
         ).order_by("id")
 
@@ -195,10 +196,10 @@ class GroupViewSet(viewsets.ModelViewSet):
             )
 
     def get_queryset(self):
+        user_subscription_list = self.request.user.profile.user_subscription_list
         return (
-            self.queryset.filter(
-                user_list=self.request.user.profile.user_subscription_list
-            )
+            self.queryset.filter(user_list=user_subscription_list)
+            .annotate(subscription_count=Count("subscriptions"))
             .order_by("-id")
             .distinct()
         )
@@ -225,13 +226,14 @@ def add_subscription_to_group(request, group_id):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
     subscription_id = serializer.validated_data["subscription_id"]
+    user_subscription_list = request.user.profile.user_subscription_list
 
-    group = get_object_or_404(Group, pk=group_id)
-    subscription = get_object_or_404(Subscription, pk=subscription_id)
+    group = get_object_or_404(Group, pk=group_id, user_list=user_subscription_list)
+    subscription = get_object_or_404(
+        Subscription, pk=subscription_id, users_list=user_subscription_list
+    )
 
-    current_group = subscription.group.filter(
-        user_list=request.user.profile.user_subscription_list
-    ).first()
+    current_group = subscription.group.filter(user_list=user_subscription_list).first()
 
     if subscription and group != current_group:
         group.subscriptions.add(subscription)

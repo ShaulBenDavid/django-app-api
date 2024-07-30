@@ -11,15 +11,12 @@ class SubscriptionSerializer(serializers.ModelSerializer):
 
 
 class GroupSerializer(serializers.ModelSerializer):
-    subscription_count = serializers.SerializerMethodField()
+    subscription_count = serializers.IntegerField(read_only=True)
 
     class Meta:
         model = Group
         fields = ["id", "title", "description", "subscription_count"]
         read_only_fields = ["id", "subscription_count"]
-
-    def get_subscription_count(self, obj):
-        return obj.subscriptions.count()
 
     def create(self, validated_data):
         """Create a group."""
