@@ -133,7 +133,6 @@ USE_I18N = True
 
 USE_TZ = True
 
-
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/4.2/howto/static-files/
 
@@ -186,6 +185,7 @@ SIMPLE_JWT = {
     "AUTH_COOKIE_SECURE": True,
     "AUTH_COOKIE_SAMESITE": "strict",
     "AUTH_COOKIE_EXPIRATION": datetime.utcnow() + timedelta(days=7),
+    "AUTH_COOKIE_MAX_AGE": timedelta(days=7),
 }
 
 CORS_ALLOWED_ORIGINS = [
