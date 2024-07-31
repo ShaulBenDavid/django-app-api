@@ -1,3 +1,5 @@
+from datetime import timedelta
+
 from django.db.models import Count
 from django.utils import timezone
 from django_filters.rest_framework import DjangoFilterBackend
@@ -71,10 +73,13 @@ class SubscriptionsView(APIView):
                 )
             )
 
-            current_month = timezone.now().month
-            last_sync_month = user_subscription_list.last_data_sync.month
+            current_month = timezone.now()
+            last_sync_month = user_subscription_list.last_data_sync
+
+            time_difference = current_month - last_sync_month
+
             # We sync data from YouTube only once a month
-            if current_month == last_sync_month and not created:
+            if time_difference <= timedelta(days=7) and not created:
                 subscriptions_count = user_subscription_list.subscriptions.count()
                 return Response(
                     {
