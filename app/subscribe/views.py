@@ -205,7 +205,7 @@ class GroupViewSet(viewsets.ModelViewSet):
         return (
             self.queryset.filter(user_list=user_subscription_list)
             .annotate(subscription_count=Count("subscriptions"))
-            .order_by("-id")
+            .order_by("title")
             .distinct()
         )
 
