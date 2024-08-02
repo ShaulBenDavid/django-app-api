@@ -40,6 +40,7 @@ class UserSubscriptionCollection(models.Model):
 class Group(models.Model):
     title = models.CharField(max_length=100)
     description = models.TextField(max_length=255, null=True, blank=True)
+    emoji = models.CharField(max_length=10, null=True, blank=True)
     user_list = models.ForeignKey(
         UserSubscriptionCollection, on_delete=models.CASCADE, related_name="user_groups"
     )

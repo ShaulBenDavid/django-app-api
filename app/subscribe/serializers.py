@@ -15,7 +15,7 @@ class GroupSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Group
-        fields = ["id", "title", "description", "subscription_count"]
+        fields = ["id", "title", "description", "emoji", "subscription_count"]
         read_only_fields = ["id", "subscription_count"]
 
     def create(self, validated_data):
