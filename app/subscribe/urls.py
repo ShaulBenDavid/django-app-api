@@ -23,5 +23,15 @@ urlpatterns = [
         views.remove_subscription_from_group,
         name="remove_subscription_from_group",
     ),
+    path(
+        "group-share-link/",
+        views.SubscriptionGroupShareLinkViewSet.as_view(),
+        name="share-link",
+    ),
+    path(
+        "shared-group/",
+        views.GetSubscriptionGroupFromShareLinkViewSet.as_view(),
+        name="shared-group",
+    ),
     path("", include(router.urls)),
 ]

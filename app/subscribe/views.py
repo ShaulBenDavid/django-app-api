@@ -12,7 +12,7 @@ from rest_framework.decorators import (
     permission_classes,
     authentication_classes,
 )
-from rest_framework.generics import get_object_or_404
+from rest_framework.generics import get_object_or_404, ListAPIView
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.views import APIView
 from rest_framework.response import Response
@@ -31,6 +31,8 @@ from .utils import (
     get_upload_playlist_ids,
     get_latest_uploads,
     get_video_details,
+    generate_temp_group_url,
+    validate_temp_group_url,
 )
 
 
@@ -277,3 +279,94 @@ def remove_subscription_from_group(request, subscription_id):
         },
         status=status.HTTP_400_BAD_REQUEST,
     )
+
+
+class SubscriptionGroupShareLinkViewSet(APIView):
+    authentication_classes = [JWTAuthentication]
+    permission_classes = [IsAuthenticated]
+
+    @extend_schema(
+        parameters=[
+            OpenApiParameter(
+                name="group_id",
+                type=OpenApiTypes.STR,
+                description="ID of the group to share",
+                required=True,
+                location=OpenApiParameter.QUERY,
+            ),
+            OpenApiParameter(
+                name="path",
+                type=OpenApiTypes.STR,
+                description="The path for the temporary group URL",
+                required=True,
+                location=OpenApiParameter.QUERY,
+            ),
+        ],
+    )
+    def get(self, request):
+        group_id = request.query_params.get("group_id", None)
+        path = request.query_params.get("path", None)
+
+        if not group_id or not path:
+            return Response(
+                status=status.HTTP_400_BAD_REQUEST,
+                data={"error": "group_id/path is required"},
+            )
+
+        try:
+            group = get_object_or_404(
+                Group,
+                pk=group_id,
+                user_list=request.user.profile.user_subscription_list,
+            )
+            group_share_link = generate_temp_group_url(path=path, group_id=group.pk)
+
+            return Response(data={"link": group_share_link}, status=status.HTTP_200_OK)
+        except Exception as e:
+            return Response(
+                status=status.HTTP_400_BAD_REQUEST,
+                data={"error": "Failed to create the group share link."},
+            )
+
+
+class GetSubscriptionGroupFromShareLinkViewSet(ListAPIView):
+    queryset = Subscription.objects.all()
+    serializer_class = SubscriptionSerializer
+
+    @extend_schema(
+        parameters=[
+            OpenApiParameter(
+                name="token",
+                type=OpenApiTypes.STR,
+                description="ID of the group to share",
+                required=True,
+                location=OpenApiParameter.QUERY,
+            ),
+        ],
+    )
+    def get_queryset(self):
+        token = self.request.query_params.get("token", None)
+        if not token:
+            return Response(
+                status=status.HTTP_400_BAD_REQUEST,
+                data={"error": "token is required"},
+            )
+
+        try:
+            group_id = validate_temp_group_url(token=token)
+            return self.queryset.filter(
+                group__id=group_id,
+            ).order_by("id")
+
+        except Exception as e:
+            return Subscription.objects.none()
+
+    def list(self, request, *args, **kwargs):
+        queryset = self.get_queryset()
+        if not queryset:
+            return Response(
+                status=status.HTTP_400_BAD_REQUEST,
+                data={"error": "Failed to fetch group or no subscriptions found."},
+            )
+        serializer = self.get_serializer(queryset, many=True)
+        return Response(serializer.data)
