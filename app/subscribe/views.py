@@ -71,16 +71,16 @@ class SubscriptionsView(APIView):
         try:
             user_subscription_list, created = (
                 UserSubscriptionCollection.objects.update_or_create(
-                    user=request.user.profile,
+                    user=request.user.profile
                 )
             )
 
-            current_month = timezone.now()
-            last_sync_month = user_subscription_list.last_data_sync
+            current_date = timezone.now()
+            last_sync_date = user_subscription_list.last_data_sync or timezone.now()
 
-            time_difference = current_month - last_sync_month
+            time_difference = current_date - last_sync_date
 
-            # We sync data from YouTube only once a month
+            # We sync data from YouTube only once a week
             if time_difference <= timedelta(days=7) and not created:
                 subscriptions_count = user_subscription_list.subscriptions.count()
                 return Response(
