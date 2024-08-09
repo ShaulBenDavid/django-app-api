@@ -29,9 +29,9 @@ urlpatterns = [
         name="share-link",
     ),
     path(
-        "shared-group/",
-        views.GetSubscriptionGroupFromShareLinkViewSet.as_view(),
-        name="shared-group",
+        "shared-subscriptions/",
+        views.GetSubscriptionsFromShareLinkViewSet.as_view(),
+        name="shared-subscriptions",
     ),
     path("", include(router.urls)),
 ]

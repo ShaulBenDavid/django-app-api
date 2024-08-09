@@ -329,7 +329,7 @@ class SubscriptionGroupShareLinkViewSet(APIView):
             )
 
 
-class GetSubscriptionGroupFromShareLinkViewSet(ListAPIView):
+class GetSubscriptionsFromShareLinkViewSet(ListAPIView):
     queryset = Subscription.objects.all()
     serializer_class = SubscriptionSerializer
 
