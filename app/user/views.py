@@ -147,6 +147,8 @@ class RefreshTokenView(APIView):
             refresh = RefreshToken(refresh_token)
             google_access = google_refresh_access_token(google_refresh_token)
             access_token = str(refresh.access_token)
+            user_id = refresh.access_token.payload.get("user_id", None)
+            User.objects.get(id=user_id)
 
             response_data = {
                 "access_token": str(access_token),
@@ -156,7 +158,7 @@ class RefreshTokenView(APIView):
         except User.DoesNotExist:
             return Response(
                 {"error": "Refresh token has expired"},
-                status=status.HTTP_400_BAD_REQUEST,
+                status=status.HTTP_401_UNAUTHORIZED,
             )
         except Exception as e:
             return Response({"error": str(e)}, status=status.HTTP_401_UNAUTHORIZED)
