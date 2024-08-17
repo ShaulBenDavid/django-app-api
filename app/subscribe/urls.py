@@ -33,5 +33,10 @@ urlpatterns = [
         views.GetSubscriptionsFromShareLinkViewSet.as_view(),
         name="shared-subscriptions",
     ),
+    path(
+        "shared-group/info/",
+        views.GetGroupInfoFromShareLinkViewSet.as_view(),
+        name="shared-group-info",
+    ),
     path("", include(router.urls)),
 ]

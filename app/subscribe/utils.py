@@ -146,10 +146,13 @@ def transform_subscriptions(subscriptions):
     return transformed_subscriptions, channel_ids
 
 
-def generate_temp_group_url(path: str, group_id: int, expires_in_days: int = 1) -> str:
+def generate_temp_group_url(
+    path: str, group_id: int, user_list_id: int, expires_in_days: int = 1
+) -> str:
     """
     Generates a JWT for a temporary URL.
 
+    :param user_list_id:
     :param group_id:
     :param path: The resource path or URL you want to secure.
     :param expires_in_days: The validity period for the temporary URL.
@@ -159,6 +162,7 @@ def generate_temp_group_url(path: str, group_id: int, expires_in_days: int = 1) 
 
     payload = {
         "group_id": group_id,
+        "user_list_id": user_list_id,
         "exp": expiration,
     }
 
@@ -180,7 +184,9 @@ def validate_temp_group_url(token: str) -> int:
         )
 
         group_id = payload["group_id"]
-        return int(group_id)
+        user_list_id = payload["user_list_id"]
+        expiration = payload["exp"]
+        return int(group_id), int(user_list_id), int(expiration)
     except jwt.ExpiredSignatureError:
         raise AuthenticationFailed("Token has expired")
     except jwt.InvalidTokenError:

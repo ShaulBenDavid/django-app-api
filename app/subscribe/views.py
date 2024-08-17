@@ -24,6 +24,7 @@ from .serializers import (
     SubscriptionSerializer,
     GroupSerializer,
     AddSubscriptionToGroupSerializer,
+    SharedGroupInfoSerializer,
 )
 from .utils import (
     get_youtube_subscriptions,
@@ -319,7 +320,9 @@ class SubscriptionGroupShareLinkViewSet(APIView):
                 pk=group_id,
                 user_list=request.user.profile.user_subscription_list,
             )
-            group_share_link = generate_temp_group_url(path=path, group_id=group.pk)
+            group_share_link = generate_temp_group_url(
+                path=path, group_id=group.pk, user_list_id=group.user_list.id
+            )
 
             return Response(data={"link": group_share_link}, status=status.HTTP_200_OK)
         except Exception as e:
@@ -353,9 +356,10 @@ class GetSubscriptionsFromShareLinkViewSet(ListAPIView):
             )
 
         try:
-            group_id = validate_temp_group_url(token=token)
+            group_id, user_list_id, _ = validate_temp_group_url(token=token)
             return self.queryset.filter(
                 group__id=group_id,
+                users_list__id=user_list_id,
             ).order_by("id")
 
         except Exception as e:
@@ -370,3 +374,43 @@ class GetSubscriptionsFromShareLinkViewSet(ListAPIView):
             )
         serializer = self.get_serializer(queryset, many=True)
         return Response(serializer.data)
+
+
+class GetGroupInfoFromShareLinkViewSet(APIView):
+    queryset = Group.objects.select_related("user_list__user")
+
+    @extend_schema(
+        parameters=[
+            OpenApiParameter(
+                name="token",
+                type=OpenApiTypes.STR,
+                description="ID of the group to share",
+                required=True,
+                location=OpenApiParameter.QUERY,
+            ),
+        ],
+    )
+    def get(self, request, *args, **kwargs):
+        token = self.request.query_params.get("token", None)
+        if not token:
+            return Response(
+                status=status.HTTP_400_BAD_REQUEST,
+                data={"error": "token is required"},
+            )
+
+        try:
+            group_id, user_list_id, expiration = validate_temp_group_url(token=token)
+            group = self.queryset.get(pk=group_id, user_list=user_list_id)
+            serializer = SharedGroupInfoSerializer(group)
+
+            response_data = serializer.data
+            response_data["expiration_date"] = expiration
+
+            return Response(data=response_data, status=status.HTTP_200_OK)
+
+        except Group.DoesNotExist:
+            return Response(
+                status=status.HTTP_404_NOT_FOUND, data={"error": "Group not found"}
+            )
+        except Exception as e:
+            return Response(status=status.HTTP_400_BAD_REQUEST, data={"error": str(e)})

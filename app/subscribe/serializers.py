@@ -1,6 +1,6 @@
 from rest_framework import serializers
 
-from core.models import Subscription, Group, UserSubscriptionCollection
+from core.models import Subscription, Group, UserSubscriptionCollection, Profile
 
 
 class SubscriptionSerializer(serializers.ModelSerializer):
@@ -34,3 +34,25 @@ class GroupSerializer(serializers.ModelSerializer):
 
 class AddSubscriptionToGroupSerializer(serializers.Serializer):
     subscription_id = serializers.IntegerField(required=True)
+
+
+class SharedProfileSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Profile
+        fields = ["username", "image_url"]
+
+
+class SharedUserSubscriptionCollectionSerializer(serializers.ModelSerializer):
+    user = SharedProfileSerializer()
+
+    class Meta:
+        model = UserSubscriptionCollection
+        fields = ["user"]
+
+
+class SharedGroupInfoSerializer(serializers.ModelSerializer):
+    user_list = SharedUserSubscriptionCollectionSerializer()
+
+    class Meta:
+        model = Group
+        fields = ["id", "title", "description", "emoji", "user_list"]
