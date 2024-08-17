@@ -270,7 +270,7 @@ def remove_subscription_from_group(request, subscription_id):
     if group:
         group.subscriptions.remove(subscription)
         return Response(
-            {"message": "Subscription removed from the group."},
+            data={"message": "Subscription removed from the group."},
             status=status.HTTP_204_NO_CONTENT,
         )
 
