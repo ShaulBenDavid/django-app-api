@@ -377,8 +377,6 @@ class GetSubscriptionsFromShareLinkViewSet(ListAPIView):
 
 
 class GetGroupInfoFromShareLinkViewSet(APIView):
-    queryset = Group.objects.select_related("user_list__user")
-
     @extend_schema(
         parameters=[
             OpenApiParameter(
@@ -400,7 +398,11 @@ class GetGroupInfoFromShareLinkViewSet(APIView):
 
         try:
             group_id, user_list_id, expiration = validate_temp_group_url(token=token)
-            group = self.queryset.get(pk=group_id, user_list=user_list_id)
+
+            group = Group.objects.select_related(
+                "user_list__user__user"
+            ).get(pk=group_id, user_list=user_list_id)
+
             serializer = SharedGroupInfoSerializer(group)
 
             response_data = serializer.data
