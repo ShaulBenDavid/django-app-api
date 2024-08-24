@@ -178,15 +178,15 @@ SIMPLE_JWT = {
     "JTI_CLAIM": "jti",
     "SLIDING_TOKEN_REFRESH_EXP_CLAIM": "refresh_exp",
     "SLIDING_TOKEN_LIFETIME": timedelta(minutes=30),
-    "SLIDING_TOKEN_REFRESH_LIFETIME": timedelta(days=3),
+    "SLIDING_TOKEN_REFRESH_LIFETIME": timedelta(days=30),
     # custom
     "AUTH_COOKIE": "refresh_token",
     "AUTH_GOOGLE_COOKIE": "google_token",
     "AUTH_COOKIE_HTTP_ONLY": True,
     "AUTH_COOKIE_SECURE": True,
     "AUTH_COOKIE_SAMESITE": "strict",
-    "AUTH_COOKIE_EXPIRATION": datetime.utcnow() + timedelta(days=7),
-    "AUTH_COOKIE_MAX_AGE": timedelta(days=7),
+    "AUTH_COOKIE_EXPIRATION": datetime.utcnow() + timedelta(days=30),
+    "AUTH_COOKIE_MAX_AGE": timedelta(days=30),
 }
 
 CORS_ALLOWED_ORIGINS = [

@@ -1,41 +1,49 @@
 from django.urls import path, include
 from rest_framework.routers import DefaultRouter
 
-from . import views
+from subscribe.views.group import (
+    add_subscription_to_group,
+    remove_subscription_from_group,
+    GroupViewSet,
+)
+from subscribe.views.public import (
+    SubscriptionGroupShareLinkViewSet,
+    GetSubscriptionsFromShareLinkViewSet,
+    GetGroupInfoFromShareLinkViewSet,
+)
+from subscribe.views.subscriptions import SubscriptionsView, SubscriptionsListView
 
 router = DefaultRouter()
-router.register("groups", views.GroupViewSet)
+router.register("groups", GroupViewSet)
 
 app_name = "subscribe"
 
 urlpatterns = [
-    path("info/", views.SubscriptionsView.as_view(), name="subscriptions-view"),
-    path(
-        "list/", views.SubscriptionsListView.as_view(), name="subscriptions-list-view"
-    ),
+    path("info/", SubscriptionsView.as_view(), name="subscriptions-view"),
+    path("list/", SubscriptionsListView.as_view(), name="subscriptions-list-view"),
     path(
         "groups/<int:group_id>/add-subscription/",
-        views.add_subscription_to_group,
+        add_subscription_to_group,
         name="add_subscription_to_group",
     ),
     path(
         "subs/<int:subscription_id>/ungroup-subscription/",
-        views.remove_subscription_from_group,
+        remove_subscription_from_group,
         name="remove_subscription_from_group",
     ),
     path(
         "group-share-link/",
-        views.SubscriptionGroupShareLinkViewSet.as_view(),
+        SubscriptionGroupShareLinkViewSet.as_view(),
         name="share-link",
     ),
     path(
         "shared-subscriptions/",
-        views.GetSubscriptionsFromShareLinkViewSet.as_view(),
+        GetSubscriptionsFromShareLinkViewSet.as_view(),
         name="shared-subscriptions",
     ),
     path(
         "shared-group/info/",
-        views.GetGroupInfoFromShareLinkViewSet.as_view(),
+        GetGroupInfoFromShareLinkViewSet.as_view(),
         name="shared-group-info",
     ),
     path("", include(router.urls)),
