@@ -12,7 +12,9 @@ class SubscriptionFilter(django_filters.FilterSet):
     def filter_by_group(self, queryset, name, value):
         if value.lower() == "ungroup":
             # Return subscriptions without any group
-            return queryset.filter(group__isnull=True)
+            return queryset.exclude(
+                group__user_list=self.request.user.profile.user_subscription_list
+            )
         if value:
             # Return all subscriptions
             return queryset.filter(group=value)

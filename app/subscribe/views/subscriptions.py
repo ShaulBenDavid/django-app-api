@@ -13,7 +13,7 @@ from rest_framework import status, generics
 from core.models import Subscription, UserSubscriptionCollection
 from core.utils.pagination import StandardResultsSetPagination
 from subscribe.filters import SubscriptionFilter
-from subscribe.serializers.subscriptions import SubscriptionSerializer
+from subscribe.serializers.subscriptions import DetailedSubscriptionSerializer
 
 from subscribe.utils.subscriptions import (
     get_youtube_subscriptions,
@@ -141,7 +141,7 @@ class SubscriptionsListView(generics.ListAPIView):
     authentication_classes = [JWTAuthentication]
     permission_classes = [IsAuthenticated]
     queryset = Subscription.objects.all()
-    serializer_class = SubscriptionSerializer
+    serializer_class = DetailedSubscriptionSerializer
     pagination_class = StandardResultsSetPagination
     filter_backends = [
         filters.OrderingFilter,
@@ -153,6 +153,10 @@ class SubscriptionsListView(generics.ListAPIView):
     filterset_class = SubscriptionFilter
 
     def get_queryset(self):
-        return self.queryset.filter(
-            users_list=self.request.user.profile.user_subscription_list,
-        ).order_by("id")
+        return (
+            self.queryset.prefetch_related("group")
+            .filter(
+                users_list=self.request.user.profile.user_subscription_list,
+            )
+            .order_by("id")
+        )
