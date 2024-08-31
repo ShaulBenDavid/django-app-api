@@ -96,7 +96,8 @@ class SubscriptionsView(APIView):
                 group = subscription_to_remove.group.filter(
                     user_list=user_subscription_list
                 ).first()
-                group.subscriptions.remove(subscription_to_remove)
+                if group:
+                    group.subscriptions.remove(subscription_to_remove)
 
             # Sync the fetched subscriptions with the user's subscriptions
             for subscription_data in transformed_subscriptions:
@@ -106,7 +107,7 @@ class SubscriptionsView(APIView):
 
                 if not existing_subscription:
                     # Create a new subscription if it doesn't exist
-                    subscription, _ = Subscription.objects.get_or_create(
+                    subscription, _ = Subscription.objects.update_or_create(
                         channel_id=subscription_data["channel_id"],
                         defaults={
                             "title": subscription_data["title"],
@@ -114,6 +115,8 @@ class SubscriptionsView(APIView):
                             "image_url": subscription_data["image_url"],
                         },
                     )
+                    print(subscription)
+                    print(user_subscription_list)
                     user_subscription_list.subscriptions.add(subscription)
 
             subscriptions_count = user_subscription_list.subscriptions.count()

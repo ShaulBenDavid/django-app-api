@@ -1,5 +1,6 @@
 from urllib.parse import urlencode
 
+from django.utils import timezone
 from drf_spectacular.types import OpenApiTypes
 from drf_spectacular.utils import extend_schema, OpenApiParameter
 from rest_framework import serializers, generics
@@ -148,7 +149,9 @@ class RefreshTokenView(APIView):
             google_access = google_refresh_access_token(google_refresh_token)
             access_token = str(refresh.access_token)
             user_id = refresh.access_token.payload.get("user_id", None)
-            User.objects.get(id=user_id)
+            user = User.objects.get(id=user_id)
+            user.last_login = timezone.now()
+            user.save()
 
             response_data = {
                 "access_token": str(access_token),
