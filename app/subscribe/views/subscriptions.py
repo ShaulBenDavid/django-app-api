@@ -115,8 +115,6 @@ class SubscriptionsView(APIView):
                             "image_url": subscription_data["image_url"],
                         },
                     )
-                    print(subscription)
-                    print(user_subscription_list)
                     user_subscription_list.subscriptions.add(subscription)
 
             subscriptions_count = user_subscription_list.subscriptions.count()
