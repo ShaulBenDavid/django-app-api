@@ -9,10 +9,11 @@ MAX_GROUPS_PER_USER = 15
 @receiver(pre_save, sender=Group)
 def validate_group_limit(sender, instance, **kwargs):
     user_subscription_collection = instance.user_list
-    if user_subscription_collection.user_groups.count() >= MAX_GROUPS_PER_USER:
-        raise ValidationError(
-            f"You cannot create more than {MAX_GROUPS_PER_USER} groups."
-        )
+    if instance.pk is None:
+        if user_subscription_collection.user_groups.count() >= MAX_GROUPS_PER_USER:
+            raise ValidationError(
+                f"You cannot create more than {MAX_GROUPS_PER_USER} groups."
+            )
 
 
 @receiver(m2m_changed, sender=Group.subscriptions.through)
