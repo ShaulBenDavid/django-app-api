@@ -1,5 +1,5 @@
 from datetime import timedelta
-from rest_framework import status, generics, viewsets, filters
+from rest_framework import filters
 from django_filters.rest_framework import DjangoFilterBackend
 from django.utils import timezone
 from drf_spectacular.utils import extend_schema, OpenApiParameter

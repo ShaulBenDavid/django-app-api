@@ -1,6 +1,7 @@
 from rest_framework import serializers
 
 from core.models import Group, UserSubscriptionCollection
+from subscribe.serializers.subscriptions import SubscriptionSerializer
 
 
 class GroupSerializer(serializers.ModelSerializer):
@@ -27,3 +28,15 @@ class GroupSerializer(serializers.ModelSerializer):
 
 class AddSubscriptionToGroupSerializer(serializers.Serializer):
     subscription_id = serializers.IntegerField(required=True)
+
+
+class GroupListSerializer(serializers.ModelSerializer):
+    subscriptions = serializers.SerializerMethodField()
+
+    class Meta:
+        model = Group
+        fields = ["id", "title", "emoji", "subscriptions"]
+
+    def get_subscriptions(self, obj):
+        subscriptions = obj.subscriptions.all()[:5]
+        return SubscriptionSerializer(subscriptions, many=True).data

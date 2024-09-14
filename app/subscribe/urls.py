@@ -5,6 +5,7 @@ from subscribe.views.group import (
     add_subscription_to_group,
     remove_subscription_from_group,
     GroupViewSet,
+    GetGroupListView,
 )
 from subscribe.views.public import (
     SubscriptionGroupShareLinkViewSet,
@@ -31,6 +32,8 @@ urlpatterns = [
         remove_subscription_from_group,
         name="remove_subscription_from_group",
     ),
+    path("groups/detailed/", GetGroupListView.as_view(), name="detailed_group_list"),
+    # Public
     path(
         "group-share-link/",
         SubscriptionGroupShareLinkViewSet.as_view(),

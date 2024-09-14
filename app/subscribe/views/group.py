@@ -1,5 +1,6 @@
 from django.db.models import Count
 from django.core.exceptions import ValidationError
+from django_filters.rest_framework import DjangoFilterBackend
 from drf_spectacular.utils import extend_schema, OpenApiResponse
 from rest_framework.decorators import (
     api_view,
@@ -10,11 +11,13 @@ from rest_framework.generics import get_object_or_404
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework_simplejwt.authentication import JWTAuthentication
-from rest_framework import status, viewsets
+from rest_framework import status, viewsets, generics, filters
 from core.models import Subscription, Group
+from core.utils.pagination import StandardResultsSetPagination
 from subscribe.serializers.group import (
     AddSubscriptionToGroupSerializer,
     GroupSerializer,
+    GroupListSerializer,
 )
 from subscribe.serializers.subscriptions import SubscriptionSerializer
 
@@ -128,3 +131,35 @@ def remove_subscription_from_group(request, subscription_id):
         },
         status=status.HTTP_400_BAD_REQUEST,
     )
+
+
+class GetGroupListView(generics.ListAPIView):
+    """
+    GroupListView - return groups with subscription list
+    * Supports filtering and sort.
+    * Supports pagination.
+    """
+
+    authentication_classes = [JWTAuthentication]
+    permission_classes = [IsAuthenticated]
+    queryset = Group.objects.all()
+    serializer_class = GroupListSerializer
+    pagination_class = StandardResultsSetPagination
+    filter_backends = [
+        filters.OrderingFilter,
+        filters.SearchFilter,
+        DjangoFilterBackend,
+    ]
+    search_fields = ["title"]
+    ordering_fields = ["title"]
+
+    def get_queryset(self):
+        self.pagination_class.page_size = 5
+
+        return (
+            self.queryset.prefetch_related("subscriptions")
+            .filter(
+                user_list=self.request.user.profile.user_subscription_list,
+            )
+            .order_by("id")
+        )
