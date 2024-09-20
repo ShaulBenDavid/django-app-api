@@ -32,11 +32,15 @@ class AddSubscriptionToGroupSerializer(serializers.Serializer):
 
 class GroupListSerializer(serializers.ModelSerializer):
     subscriptions = serializers.SerializerMethodField()
+    subscriptions_count = serializers.SerializerMethodField()
 
     class Meta:
         model = Group
-        fields = ["id", "title", "emoji", "subscriptions"]
+        fields = ["id", "title", "emoji", "subscriptions", "subscriptions_count"]
 
     def get_subscriptions(self, obj):
         subscriptions = obj.subscriptions.all()[:5]
         return SubscriptionSerializer(subscriptions, many=True).data
+
+    def get_subscriptions_count(self, obj):
+        return obj.subscriptions.count()
