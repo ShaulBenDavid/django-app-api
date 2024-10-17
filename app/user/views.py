@@ -1,3 +1,4 @@
+from http import HTTPStatus
 from urllib.parse import urlencode
 
 from django.utils import timezone
@@ -19,9 +20,9 @@ from user.utils import (
     generate_tokens_for_user,
     google_refresh_access_token,
 )
-from core.models import User
+from core.models import User, Profile
 from rest_framework import status
-from user.serializers import UserInfoSerializer
+from user.serializers import UserInfoSerializer, UserProfileSerializer
 
 
 @extend_schema(
@@ -209,3 +210,23 @@ class UserInfoView(generics.RetrieveAPIView):
 
     def get_object(self):
         return self.request.user
+
+
+
+class UserProfileView(APIView):
+    serializer_class = UserProfileSerializer
+    authentication_classes = [JWTAuthentication]
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        profile = Profile.objects.get(user=request.user)
+        serializer = self.serializer_class(profile)
+        return Response(serializer.data, status=HTTPStatus.OK)
+
+    def patch(self, request):
+        profile = Profile.objects.get(user=request.user)
+        serializer = self.serializer_class(profile, data=request.data, partial=True)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)

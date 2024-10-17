@@ -1,7 +1,7 @@
 from rest_framework import serializers
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 
-from core.models import User
+from core.models import User, Profile
 
 
 class UserSerializer(serializers.ModelSerializer):
@@ -24,3 +24,11 @@ class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
     def get_token(cls, user, **kwargs):
         token = super().get_token(user)
         return token
+
+
+class UserProfileSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = Profile
+        fields = ["username", "instagram_url", "twitter_url", "linkedin_url", "youtube_url"]
+        read_only_fields = ["username"]
