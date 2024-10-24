@@ -230,3 +230,8 @@ class UserProfileView(APIView):
             serializer.save()
             return Response(serializer.data)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    def delete(self, request):
+        user = User.objects.get(id=request.user.id)
+        user.delete()
+        return Response('User deleted successfully', status=HTTPStatus.OK)
