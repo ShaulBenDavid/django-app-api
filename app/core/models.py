@@ -25,6 +25,7 @@ class Profile(models.Model):
     twitter_url = models.URLField(max_length=255, blank=True, null=True)
     linkedin_url = models.URLField(max_length=255, blank=True, null=True)
     youtube_url = models.URLField(max_length=255, blank=True, null=True)
+    is_public = models.BooleanField(default=False)
 
     def __str__(self):
         return self.username
@@ -48,6 +49,7 @@ class Group(models.Model):
     user_list = models.ForeignKey(
         UserSubscriptionCollection, on_delete=models.CASCADE, related_name="user_groups"
     )
+    is_public = models.BooleanField(default=False)
 
     def __str__(self):
         return self.title
