@@ -30,7 +30,14 @@ class UserProfileSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Profile
-        fields = ["username", "instagram_url", "twitter_url", "linkedin_url", "youtube_url", "is_public"]
+        fields = [
+            "username",
+            "instagram_url",
+            "twitter_url",
+            "linkedin_url",
+            "youtube_url",
+            "is_public",
+        ]
         read_only_fields = ["username"]
 
 
@@ -39,5 +46,13 @@ class PublicUserProfileSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Profile
-        fields = ["username", "instagram_url", "twitter_url", "linkedin_url", "youtube_url", "is_public", "user"]
+        fields = [
+            "username",
+            "instagram_url",
+            "twitter_url",
+            "linkedin_url",
+            "youtube_url",
+            "is_public",
+            "user",
+        ]
         read_only_fields = ["username"]

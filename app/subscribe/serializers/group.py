@@ -9,7 +9,14 @@ class GroupSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Group
-        fields = ["id", "title", "description", "emoji", "subscription_count", "is_public"]
+        fields = [
+            "id",
+            "title",
+            "description",
+            "emoji",
+            "subscription_count",
+            "is_public",
+        ]
         read_only_fields = ["id", "subscription_count"]
 
     def create(self, validated_data):

@@ -6,8 +6,10 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework_simplejwt.authentication import JWTAuthentication
-from rest_framework import status
+from rest_framework import status, generics
 from core.models import Subscription, Group
+from core.utils.pagination import StandardResultsSetPagination
+from subscribe.serializers.group import GroupListSerializer
 from subscribe.serializers.subscriptions import (
     SubscriptionSerializer,
 )
@@ -154,3 +156,31 @@ class GetGroupInfoFromShareLinkViewSet(APIView):
             )
         except Exception as e:
             return Response(status=status.HTTP_400_BAD_REQUEST, data={"error": str(e)})
+
+
+class GetUserGroupsView(generics.ListAPIView):
+    """
+    GetUserGroupsView - return groups with subscription list
+    * Supports pagination.
+    """
+
+    queryset = Group.objects.all()
+    serializer_class = GroupListSerializer
+    pagination_class = StandardResultsSetPagination
+    search_fields = ["title"]
+    ordering_fields = ["title"]
+
+    def get_queryset(self):
+        username = self.kwargs.get("username")
+        self.pagination_class.page_size = 5
+
+        return (
+            self.queryset.select_related("user_list__user")
+            .prefetch_related("subscriptions")
+            .filter(
+                user_list__user__username=username,
+                user_list__user__is_public=True,
+                is_public=True,
+            )
+            .order_by("id")
+        )

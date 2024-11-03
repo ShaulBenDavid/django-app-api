@@ -22,7 +22,11 @@ from user.utils import (
 )
 from core.models import User, Profile
 from rest_framework import status
-from user.serializers import UserInfoSerializer, UserProfileSerializer, PublicUserProfileSerializer
+from user.serializers import (
+    UserInfoSerializer,
+    UserProfileSerializer,
+    PublicUserProfileSerializer,
+)
 
 
 @extend_schema(
@@ -212,7 +216,6 @@ class UserInfoView(generics.RetrieveAPIView):
         return self.request.user
 
 
-
 class UserProfileView(APIView):
     serializer_class = UserProfileSerializer
     authentication_classes = [JWTAuthentication]
@@ -234,7 +237,7 @@ class UserProfileView(APIView):
     def delete(self, request):
         user = User.objects.get(id=request.user.id)
         user.delete()
-        return Response('User deleted successfully', status=HTTPStatus.OK)
+        return Response("User deleted successfully", status=HTTPStatus.OK)
 
 
 class GetPublicUserProfileView(APIView):
@@ -243,7 +246,9 @@ class GetPublicUserProfileView(APIView):
 
     def get(self, request, username=None):
         try:
-            user = self.queryset.select_related("user").get(username=username, is_public=True)
+            user = self.queryset.select_related("user").get(
+                username=username, is_public=True
+            )
         except Profile.DoesNotExist:
             return Response(status=status.HTTP_404_NOT_FOUND)
 
