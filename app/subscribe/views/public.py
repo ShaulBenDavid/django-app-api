@@ -1,5 +1,6 @@
 from drf_spectacular.utils import extend_schema, OpenApiParameter
 from drf_spectacular.types import OpenApiTypes
+from rest_framework.exceptions import ValidationError
 
 from rest_framework.generics import get_object_or_404, ListAPIView
 from rest_framework.permissions import IsAuthenticated
@@ -7,7 +8,7 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework_simplejwt.authentication import JWTAuthentication
 from rest_framework import status, generics
-from core.models import Subscription, Group
+from core.models import Subscription, Group, Profile
 from core.utils.pagination import StandardResultsSetPagination
 from subscribe.serializers.group import GroupListSerializer
 from subscribe.serializers.subscriptions import (
@@ -184,3 +185,35 @@ class GetUserGroupsView(generics.ListAPIView):
             )
             .order_by("id")
         )
+
+
+class GetPublicGroupSubscriptionsView(ListAPIView):
+    queryset = Subscription.objects.all()
+    serializer_class = SubscriptionSerializer
+
+    def get_queryset(self):
+        group_id = self.kwargs.get("group_id", None)
+        user_id = self.kwargs.get("user_id", None)
+        is_user_public = Profile.objects.filter(id=user_id, is_public=True).exists()
+
+        if not group_id or not is_user_public:
+            raise ValidationError({"error": "ids are required"})
+
+        return self.queryset.prefetch_related("group").filter(
+            group__id=group_id,
+            group__is_public=True,
+        ).order_by("id")
+
+    def list(self, request, *args, **kwargs):
+        try:
+            queryset = self.get_queryset()
+        except ValidationError as e:
+            return Response(status=status.HTTP_400_BAD_REQUEST, data=e.detail)
+
+        if not queryset:
+            return Response(
+                status=status.HTTP_400_BAD_REQUEST,
+                data={"error": "Failed to fetch group or no subscriptions found."},
+            )
+        serializer = self.get_serializer(queryset, many=True)
+        return Response(serializer.data)

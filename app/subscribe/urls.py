@@ -12,6 +12,7 @@ from subscribe.views.public import (
     GetSubscriptionsFromShareLinkViewSet,
     GetGroupInfoFromShareLinkViewSet,
     GetUserGroupsView,
+    GetPublicGroupSubscriptionsView,
 )
 from subscribe.views.subscriptions import SubscriptionsView, SubscriptionsListView
 
@@ -54,6 +55,11 @@ urlpatterns = [
         "user/groups/<str:username>/",
         GetUserGroupsView.as_view(),
         name="get-public-user-groups",
+    ),
+    path(
+        "public-user/<int:user_id>/group/<int:group_id>/subscriptions/",
+        GetPublicGroupSubscriptionsView.as_view(),
+        name="get-public-group-subscriptions",
     ),
     path("", include(router.urls)),
 ]
