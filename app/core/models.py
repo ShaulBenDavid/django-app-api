@@ -26,6 +26,7 @@ class Profile(models.Model):
     linkedin_url = models.URLField(max_length=255, blank=True, null=True)
     youtube_url = models.URLField(max_length=255, blank=True, null=True)
     is_public = models.BooleanField(default=False)
+    description = models.CharField(max_length=255, blank=True, null=True)
 
     def __str__(self):
         return self.username

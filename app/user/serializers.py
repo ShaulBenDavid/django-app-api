@@ -37,6 +37,7 @@ class UserProfileSerializer(serializers.ModelSerializer):
             "linkedin_url",
             "youtube_url",
             "is_public",
+            "description",
         ]
         read_only_fields = ["username"]
 
@@ -53,6 +54,7 @@ class PublicUserProfileSerializer(serializers.ModelSerializer):
             "linkedin_url",
             "youtube_url",
             "is_public",
+            "description",
             "user",
         ]
         read_only_fields = ["username"]
