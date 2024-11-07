@@ -1,3 +1,5 @@
+from nntplib import GroupInfo
+
 from drf_spectacular.utils import extend_schema, OpenApiParameter
 from drf_spectacular.types import OpenApiTypes
 from rest_framework.exceptions import ValidationError
@@ -187,6 +189,35 @@ class GetUserGroupsView(generics.ListAPIView):
         )
 
 
+class GetPublicGroupInfoViewSet(APIView):
+
+    def get(self, request, user_id=None, group_id=None):
+        if not user_id or not group_id:
+            raise ValidationError({"error": "User ID and Group ID are required"})
+
+        is_user_public = Profile.objects.filter(id=user_id, is_public=True).exists()
+        if not is_user_public:
+            return Response(
+                {"error": "User profile is not public"},
+                status=status.HTTP_403_FORBIDDEN,
+            )
+
+        try:
+            group = Group.objects.prefetch_related("user_list__user").get(
+                pk=group_id, is_public=True
+            )
+            serializer = SharedGroupInfoSerializer(group)
+            return Response(data=serializer.data, status=status.HTTP_200_OK)
+
+        except Group.DoesNotExist:
+            return Response(
+                {"error": "Group not found"}, status=status.HTTP_404_NOT_FOUND
+            )
+
+        except Exception as e:
+            return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
+
+
 class GetPublicGroupSubscriptionsView(ListAPIView):
     queryset = Subscription.objects.all()
     serializer_class = SubscriptionSerializer
@@ -199,10 +230,14 @@ class GetPublicGroupSubscriptionsView(ListAPIView):
         if not group_id or not is_user_public:
             raise ValidationError({"error": "ids are required"})
 
-        return self.queryset.prefetch_related("group").filter(
-            group__id=group_id,
-            group__is_public=True,
-        ).order_by("id")
+        return (
+            self.queryset.prefetch_related("group")
+            .filter(
+                group__id=group_id,
+                group__is_public=True,
+            )
+            .order_by("id")
+        )
 
     def list(self, request, *args, **kwargs):
         try:
