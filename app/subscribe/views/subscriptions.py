@@ -101,21 +101,15 @@ class SubscriptionsView(APIView):
 
             # Sync the fetched subscriptions with the user's subscriptions
             for subscription_data in transformed_subscriptions:
-                existing_subscription = existing_subscriptions.filter(
-                    channel_id=subscription_data["channel_id"]
-                ).first()
-
-                if not existing_subscription:
-                    # Create a new subscription if it doesn't exist
-                    subscription, _ = Subscription.objects.update_or_create(
-                        channel_id=subscription_data["channel_id"],
-                        defaults={
-                            "title": subscription_data["title"],
-                            "description": subscription_data["description"],
-                            "image_url": subscription_data["image_url"],
-                        },
-                    )
-                    user_subscription_list.subscriptions.add(subscription)
+                subscription, _ = Subscription.objects.update_or_create(
+                    channel_id=subscription_data["channel_id"],
+                    defaults={
+                        "title": subscription_data["title"],
+                        "description": subscription_data["description"],
+                        "image_url": subscription_data["image_url"],
+                    },
+                )
+                user_subscription_list.subscriptions.add(subscription)
 
             subscriptions_count = user_subscription_list.subscriptions.count()
             user_subscription_list.last_data_sync = timezone.now()
