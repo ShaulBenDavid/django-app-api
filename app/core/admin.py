@@ -11,6 +11,16 @@ class CustomUserAdmin(UserAdmin):
         "last_name",
         "is_staff",
         "registration_method",
+        "role",
+    )
+
+    fieldsets = UserAdmin.fieldsets + (
+        (
+            "Additional Info",
+            {
+                "fields": ("role",),
+            },
+        ),
     )
 
 

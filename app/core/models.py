@@ -12,6 +12,11 @@ class User(AbstractUser):
     registration_method = models.CharField(
         max_length=10, choices=REGISTRATION_CHOICES, default="email"
     )
+    ROLE_CHOICES = [
+        ("user", "User"),
+        ("creator", "Creator"),
+    ]
+    role = models.CharField(max_length=10, choices=ROLE_CHOICES, default="user")
 
     def __str__(self):
         return self.username

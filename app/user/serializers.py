@@ -23,6 +23,7 @@ class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
     @classmethod
     def get_token(cls, user, **kwargs):
         token = super().get_token(user)
+        token["role"] = user.role
         return token
 
 

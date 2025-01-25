@@ -83,6 +83,7 @@ class GoogleLoginApi(PublicApiMixin, ApiErrorsMixin, APIView):
         response_data = {
             "access_token": str(access_token),
             "google_token": str(google_access_token),
+            "role": user.role,
         }
         response = Response(response_data, status=status.HTTP_200_OK)
         response.set_cookie(
@@ -161,6 +162,7 @@ class RefreshTokenView(APIView):
             response_data = {
                 "access_token": str(access_token),
                 "google_token": str(google_access),
+                "role": user.role,
             }
             return Response(response_data, status=status.HTTP_200_OK)
         except User.DoesNotExist:
