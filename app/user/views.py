@@ -1,7 +1,6 @@
 from http import HTTPStatus
 from urllib.parse import urlencode
 
-from django.db.models import Prefetch
 from django.utils import timezone
 from drf_spectacular.types import OpenApiTypes
 from drf_spectacular.utils import extend_schema, OpenApiParameter

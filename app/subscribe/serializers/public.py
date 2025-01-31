@@ -31,4 +31,4 @@ class SharedGroupInfoSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Group
-        fields = ["id", "title", "description", "emoji", "user_list"]
+        fields = ["id", "title", "emoji", "user_list"]

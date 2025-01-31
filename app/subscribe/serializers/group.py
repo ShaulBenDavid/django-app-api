@@ -12,7 +12,6 @@ class GroupSerializer(serializers.ModelSerializer):
         fields = [
             "id",
             "title",
-            "description",
             "emoji",
             "subscription_count",
             "is_public",
