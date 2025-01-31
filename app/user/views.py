@@ -297,7 +297,7 @@ class GetPublicUserProfileView(APIView):
 
     def get(self, request, username=None):
         try:
-            user = self.queryset.select_related("user").get(
+            user = self.queryset.select_related("user").prefetch_related('custom_urls').get(
                 username=username, is_public=True
             )
         except Profile.DoesNotExist:

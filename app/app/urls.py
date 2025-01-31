@@ -10,7 +10,7 @@ from django_otp.admin import OTPAdminSite
 from core import views as core_views
 
 
-admin.site.__class__ = OTPAdminSite
+# admin.site.__class__ = OTPAdminSite
 
 urlpatterns = [
     path("shon/", admin.site.urls),
