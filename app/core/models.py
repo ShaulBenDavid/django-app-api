@@ -37,6 +37,17 @@ class Profile(models.Model):
         return self.username
 
 
+class CustomURL(models.Model):
+    profile = models.ForeignKey(
+        "Profile", on_delete=models.CASCADE, related_name="custom_urls"
+    )
+    name = models.CharField(max_length=100)
+    url = models.URLField(max_length=255)
+
+    def __str__(self):
+        return f"{self.name}: {self.url}"
+
+
 ## USER Subscription list
 class UserSubscriptionCollection(models.Model):
     user = models.OneToOneField(

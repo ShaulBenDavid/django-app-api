@@ -1,7 +1,7 @@
 from rest_framework import serializers
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 
-from core.models import User, Profile
+from core.models import User, Profile, CustomURL
 
 
 class UserSerializer(serializers.ModelSerializer):
@@ -41,6 +41,17 @@ class UserProfileSerializer(serializers.ModelSerializer):
             "description",
         ]
         read_only_fields = ["username", "id"]
+
+
+class UserCustomLinksSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = CustomURL
+        fields = [
+            "name",
+            "url",
+        ]
+        read_only_fields = ["id"]
 
 
 class PublicUserProfileSerializer(serializers.ModelSerializer):

@@ -1,6 +1,7 @@
 from http import HTTPStatus
 from urllib.parse import urlencode
 
+from django.db.models import Prefetch
 from django.utils import timezone
 from drf_spectacular.types import OpenApiTypes
 from drf_spectacular.utils import extend_schema, OpenApiParameter
@@ -13,6 +14,7 @@ from rest_framework.response import Response
 from rest_framework_simplejwt.authentication import JWTAuthentication
 from rest_framework_simplejwt.tokens import RefreshToken
 
+from core.utils.auth import IsCreator
 from user.mixins import PublicApiMixin, ApiErrorsMixin
 from user.utils import (
     google_get_tokens,
@@ -20,12 +22,13 @@ from user.utils import (
     generate_tokens_for_user,
     google_refresh_access_token,
 )
-from core.models import User, Profile
+from core.models import User, Profile, CustomURL
 from rest_framework import status
 from user.serializers import (
     UserInfoSerializer,
     UserProfileSerializer,
     PublicUserProfileSerializer,
+    UserCustomLinksSerializer,
 )
 
 
@@ -240,6 +243,52 @@ class UserProfileView(APIView):
         user = User.objects.get(id=request.user.id)
         user.delete()
         return Response("User deleted successfully", status=HTTPStatus.OK)
+
+
+class UserCustomLinksView(APIView):
+    serializer_class = UserCustomLinksSerializer
+    authentication_classes = [JWTAuthentication]
+    permission_classes = [IsAuthenticated, IsCreator]
+
+    def get(self, request):
+        profile = Profile.objects.prefetch_related("custom_urls").get(user=request.user)
+        custom_links = profile.custom_urls.all()
+        serializer = self.serializer_class(custom_links, many=True)
+
+        return Response({"custom_urls": serializer.data})
+
+    def patch(self, request):
+        profile = Profile.objects.get(user=request.user)
+
+        custom_links_data = request.data.get("custom_urls", [])
+
+        serializer = self.serializer_class(data=custom_links_data, many=True)
+
+        if serializer.is_valid():
+            updated_custom_urls = []
+
+            for link_data in serializer.validated_data:
+                link, created = CustomURL.objects.update_or_create(
+                    url=link_data.get("url"),
+                    defaults={"name": link_data.get("name"), "profile": profile},
+                )
+                updated_custom_urls.append(link)
+
+            current_urls = profile.custom_urls.all()
+            current_urls_to_keep = set(updated_custom_urls)
+
+            for url in current_urls:
+                if url not in current_urls_to_keep:
+                    url.delete()
+
+            profile.custom_urls.set(updated_custom_urls)
+
+            profile.save()
+
+            updated_serializer = self.serializer_class(updated_custom_urls, many=True)
+            return Response({"custom_urls": updated_serializer.data})
+
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
 class GetPublicUserProfileView(APIView):

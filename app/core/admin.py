@@ -1,6 +1,13 @@
 from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin
-from core.models import User, Profile, Subscription, Group, UserSubscriptionCollection
+from core.models import (
+    User,
+    Profile,
+    Subscription,
+    Group,
+    UserSubscriptionCollection,
+    CustomURL,
+)
 
 
 class CustomUserAdmin(UserAdmin):
@@ -36,8 +43,19 @@ class UserListAdmin(admin.ModelAdmin):
     inlines = [GroupInline]
 
 
+class CustomURLInline(admin.TabularInline):
+    model = CustomURL
+    extra = 1
+
+
+class ProfileAdmin(admin.ModelAdmin):
+    list_display = ("username", "is_public", "description")
+    inlines = [CustomURLInline]
+
+
 admin.site.register(User, CustomUserAdmin)
-admin.site.register(Profile)
+admin.site.register(Profile, ProfileAdmin)
 admin.site.register(Subscription)
 admin.site.register(UserSubscriptionCollection, UserListAdmin)
 admin.site.register(Group)
+admin.site.register(CustomURL)
