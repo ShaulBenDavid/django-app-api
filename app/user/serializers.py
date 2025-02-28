@@ -37,6 +37,8 @@ class UserProfileSerializer(serializers.ModelSerializer):
             "twitter_url",
             "linkedin_url",
             "youtube_url",
+            "tiktok_url",
+            "telegram_url",
             "is_public",
             "description",
         ]
@@ -66,6 +68,8 @@ class PublicUserProfileSerializer(serializers.ModelSerializer):
             "twitter_url",
             "linkedin_url",
             "youtube_url",
+            "tiktok_url",
+            "telegram_url",
             "is_public",
             "description",
             "id",

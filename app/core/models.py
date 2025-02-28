@@ -30,6 +30,8 @@ class Profile(models.Model):
     twitter_url = models.URLField(max_length=255, blank=True, null=True)
     linkedin_url = models.URLField(max_length=255, blank=True, null=True)
     youtube_url = models.URLField(max_length=255, blank=True, null=True)
+    tiktok_url = models.URLField(max_length=255, blank=True, null=True)
+    telegram_url = models.URLField(max_length=255, blank=True, null=True)
     is_public = models.BooleanField(default=False)
     description = models.CharField(max_length=255, blank=True, null=True)
 
