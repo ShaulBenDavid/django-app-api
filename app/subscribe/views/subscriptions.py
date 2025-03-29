@@ -75,6 +75,7 @@ class SubscriptionsView(APIView):
                     {
                         "subscriptions_count": subscriptions_count,
                         "last_sync_date": user_subscription_list.last_data_sync,
+                        "is_data_synced": False
                     }
                 )
 
@@ -119,6 +120,7 @@ class SubscriptionsView(APIView):
                 {
                     "subscriptions_count": subscriptions_count,
                     "last_sync_date": user_subscription_list.last_data_sync,
+                    "is_data_synced": True
                 }
             )
 
