@@ -42,7 +42,7 @@ class UserProfileSerializer(serializers.ModelSerializer):
             "is_public",
             "description",
         ]
-        read_only_fields = ["username", "id"]
+        read_only_fields = ["id"]
 
 
 class UserCustomLinksSerializer(serializers.ModelSerializer):

@@ -1,4 +1,5 @@
 from http import HTTPStatus
+import random
 from urllib.parse import urlencode
 
 from django.utils import timezone
@@ -76,6 +77,7 @@ class GoogleLoginApi(PublicApiMixin, ApiErrorsMixin, APIView):
 
         user_data = google_get_user_info(access_token=google_access_token)
 
+
         try:
             user = User.objects.get(email=user_data["email"])
         except User.DoesNotExist:
@@ -110,9 +112,14 @@ class GoogleLoginApi(PublicApiMixin, ApiErrorsMixin, APIView):
         first_name = user_data.get("given_name", "")
         last_name = user_data.get("family_name", "")
 
+        email = user_data["email"]
+        username_base = email.split("@")[0]
+        random_digits = str(random.randint(10, 99))
+        username = f"{username_base}{random_digits}"
+
         return User.objects.create(
-            email=user_data["email"],
-            username=user_data["email"],
+            email=email,
+            username=username,
             image_url=user_data["picture"],
             first_name=first_name,
             last_name=last_name,
@@ -236,6 +243,7 @@ class UserProfileView(APIView):
         if serializer.is_valid():
             serializer.save()
             return Response(serializer.data)
+
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
     def delete(self, request):
@@ -294,11 +302,13 @@ class GetPublicUserProfileView(APIView):
     queryset = Profile.objects.all()
     serializer_class = PublicUserProfileSerializer
 
+
     def get(self, request, username=None):
         try:
             user = self.queryset.select_related("user").prefetch_related('custom_urls').get(
                 username=username, is_public=True
             )
+
         except Profile.DoesNotExist:
             return Response(status=status.HTTP_404_NOT_FOUND)
 
