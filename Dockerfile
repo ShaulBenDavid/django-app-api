@@ -1,4 +1,4 @@
-FROM python:3.11-alpine3.18
+FROM python:3.11-slim
 LABEL maintainer="dwizard.io"
 
 ENV PYTHONUNBUFFERED 1
