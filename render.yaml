@@ -7,10 +7,10 @@ databases:
 services:
   - type: web
     plan: starter
-    name: django-app-api
+    name: mytubesapi
     runtime: python
     buildCommand: "./build.sh"
-    startCommand: "python -m gunicorn mysite.asgi:application -k uvicorn.workers.UvicornWorker"
+    startCommand: "python -m gunicorn mytubesapi.asgi:application -k uvicorn.workers.UvicornWorker"
     envVars:
       - key: DATABASE_URL
         fromDatabase:
