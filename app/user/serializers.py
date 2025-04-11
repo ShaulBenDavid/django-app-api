@@ -74,6 +74,6 @@ class PublicUserProfileSerializer(serializers.ModelSerializer):
             "description",
             "id",
             "user",
-            "custom_urls"
+            "custom_urls",
         ]
         read_only_fields = ["username", "id"]

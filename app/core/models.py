@@ -42,10 +42,7 @@ class Profile(models.Model):
 
     class Meta:
         constraints = [
-            UniqueConstraint(
-                Lower('username'),
-                name='unique_lower_username'
-            )
+            UniqueConstraint(Lower("username"), name="unique_lower_username")
         ]
 
 

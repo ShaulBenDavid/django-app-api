@@ -77,7 +77,6 @@ class GoogleLoginApi(PublicApiMixin, ApiErrorsMixin, APIView):
 
         user_data = google_get_user_info(access_token=google_access_token)
 
-
         try:
             user = User.objects.get(email=user_data["email"])
         except User.DoesNotExist:
@@ -302,11 +301,12 @@ class GetPublicUserProfileView(APIView):
     queryset = Profile.objects.all()
     serializer_class = PublicUserProfileSerializer
 
-
     def get(self, request, username=None):
         try:
-            user = self.queryset.select_related("user").prefetch_related('custom_urls').get(
-                username=username, is_public=True
+            user = (
+                self.queryset.select_related("user")
+                .prefetch_related("custom_urls")
+                .get(username=username, is_public=True)
             )
 
         except Profile.DoesNotExist:
