@@ -9,7 +9,7 @@ services:
     plan: starter
     name: mytubesapi
     runtime: python
-    buildCommand: "./build.sh"
+    buildCommand: "./scripts/build.sh"
     startCommand: "python -m gunicorn app.asgi:application -k uvicorn.workers.UvicornWorker"
     envVars:
       - key: DATABASE_URL
