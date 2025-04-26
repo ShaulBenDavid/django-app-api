@@ -16,4 +16,5 @@ urlpatterns = [
         views.GetPublicUserProfileView.as_view(),
         name="get-user-profile",
     ),
+    path("list/", views.GetPublicUsersView.as_view(), name="user-list"),
 ]

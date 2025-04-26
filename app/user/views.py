@@ -8,6 +8,7 @@ from drf_spectacular.utils import extend_schema, OpenApiParameter
 from rest_framework import serializers, generics
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.views import APIView
+from rest_framework import filters
 from django.conf import settings
 from django.shortcuts import redirect
 from rest_framework.response import Response
@@ -15,6 +16,7 @@ from rest_framework_simplejwt.authentication import JWTAuthentication
 from rest_framework_simplejwt.tokens import RefreshToken
 
 from core.utils.auth import IsCreator
+from core.utils.pagination import StandardResultsSetPagination
 from user.mixins import PublicApiMixin, ApiErrorsMixin
 from user.utils import (
     google_get_tokens,
@@ -29,6 +31,7 @@ from user.serializers import (
     UserProfileSerializer,
     PublicUserProfileSerializer,
     UserCustomLinksSerializer,
+    GetPublicUserProfileSerializer,
 )
 
 
@@ -314,3 +317,21 @@ class GetPublicUserProfileView(APIView):
 
         serializer = self.serializer_class(user)
         return Response(serializer.data, status=status.HTTP_200_OK)
+
+
+class GetPublicUsersView(generics.ListAPIView):
+    authentication_classes = [JWTAuthentication]
+    permission_classes = [IsAuthenticated]
+    serializer_class = GetPublicUserProfileSerializer
+    pagination_class = StandardResultsSetPagination
+    queryset = Profile.objects.all()
+    filter_backends = [
+        filters.SearchFilter,
+    ]
+    search_fields = ["username"]
+
+    def get_queryset(self):
+        search_query = self.request.query_params.get("search")
+        return self.queryset.filter(
+            is_public=True, username__icontains=search_query
+        ).exclude(user=self.request.user)
