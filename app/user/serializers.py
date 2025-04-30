@@ -83,4 +83,4 @@ class GetPublicUserProfileSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Profile
-        fields = ["username", "image_url", "id"]
+        fields = ["username", "image_url", "id", "description"]
