@@ -334,4 +334,4 @@ class GetPublicUsersView(generics.ListAPIView):
         search_query = self.request.query_params.get("search")
         return self.queryset.filter(
             is_public=True, username__icontains=search_query
-        ).order_by('id')
+        ).order_by("id")

@@ -1,6 +1,7 @@
 from django.urls import path, include
 from rest_framework.routers import DefaultRouter
 
+from subscribe.views.enrich_channels import EnrichChannelsView
 from subscribe.views.group import (
     add_subscription_to_group,
     remove_subscription_from_group,
@@ -66,6 +67,11 @@ urlpatterns = [
         "public-user/<int:user_id>/group/<int:group_id>/info/",
         GetPublicGroupInfoViewSet.as_view(),
         name="get-public-group-info",
+    ),
+    path(
+        "enrich-subscriptions/",
+        EnrichChannelsView.as_view(),
+        name="enrich-subscriptions",
     ),
     path("", include(router.urls)),
 ]

@@ -1,5 +1,7 @@
+from datetime import datetime
+
 import requests
-from rest_framework import serializers
+from django.utils import timezone
 from django.conf import settings
 
 YOUTUBE_SUBSCRIPTIONS_URL = "https://www.googleapis.com/youtube/v3/subscriptions"
@@ -115,6 +117,27 @@ def get_video_details(access_token, video_ids):
         except requests.exceptions.RequestException as e:
             raise RuntimeError(f"Failed to retrieve video details: {e}")
     return video_details
+
+
+def transform_video_details(video_details):
+    transformed = []
+
+    for video in video_details:
+        upload_time_str = video["snippet"]["publishedAt"]
+        naive_dt = datetime.strptime(upload_time_str, "%Y-%m-%dT%H:%M:%SZ")
+        aware_dt = timezone.make_aware(naive_dt)
+
+        transformed.append(
+            {
+                "subscription": video["snippet"]["channelId"],
+                "title": video["snippet"]["title"],
+                "video_url": f"https://www.youtube.com/watch?v={video['id']}",
+                "video_image_url": video["snippet"]["thumbnails"]["medium"]["url"],
+                "upload_time": aware_dt,
+            }
+        )
+
+    return transformed
 
 
 def transform_subscriptions(subscriptions):

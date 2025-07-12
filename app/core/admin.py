@@ -7,6 +7,7 @@ from core.models import (
     Group,
     UserSubscriptionCollection,
     CustomURL,
+    Upload,
 )
 
 
@@ -53,9 +54,14 @@ class ProfileAdmin(admin.ModelAdmin):
     inlines = [CustomURLInline]
 
 
+class UploadAdmin(admin.ModelAdmin):
+    list_display = ("subscription", "title", "upload_time", "last_sync")
+
+
 admin.site.register(User, CustomUserAdmin)
 admin.site.register(Profile, ProfileAdmin)
 admin.site.register(Subscription)
 admin.site.register(UserSubscriptionCollection, UserListAdmin)
 admin.site.register(Group)
 admin.site.register(CustomURL)
+admin.site.register(Upload, UploadAdmin)

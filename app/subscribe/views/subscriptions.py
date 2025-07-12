@@ -18,9 +18,6 @@ from subscribe.serializers.subscriptions import DetailedSubscriptionSerializer
 from subscribe.utils.subscriptions import (
     get_youtube_subscriptions,
     transform_subscriptions,
-    get_upload_playlist_ids,
-    get_latest_uploads,
-    get_video_details,
 )
 
 
@@ -83,9 +80,7 @@ class SubscriptionsView(APIView):
             transformed_subscriptions, _ = transform_subscriptions(
                 subscriptions=subscriptions
             )
-            # subscriptions_playlist_ids = get_upload_playlist_ids(access_token=google_token, channel_ids=channel_ids)
-            # latest_videos = get_latest_uploads(access_token=google_token, playlist_ids=subscriptions_playlist_ids)
-            # video_details = get_video_details(access_token=google_token, video_ids=latest_videos)
+
             existing_subscriptions = user_subscription_list.subscriptions.all()
             # remove subscription from user data
             subscriptions_to_remove = existing_subscriptions.exclude(

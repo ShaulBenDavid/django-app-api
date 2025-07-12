@@ -2,6 +2,7 @@ from django.contrib.auth.models import AbstractUser
 from django.db import models
 from django.db.models import UniqueConstraint
 from django.db.models.functions import Lower
+from django.utils import timezone
 
 
 class User(AbstractUser):
@@ -95,3 +96,17 @@ class Subscription(models.Model):
 
     def __str__(self):
         return self.title
+
+
+class Upload(models.Model):
+    subscription = models.OneToOneField(
+        Subscription, on_delete=models.CASCADE, related_name="upload"
+    )
+    title = models.CharField(max_length=255)
+    video_url = models.URLField()
+    video_image_url = models.URLField(null=True, blank=True)
+    last_sync = models.DateTimeField(default=timezone.now)
+    upload_time = models.DateTimeField()
+
+    def __str__(self):
+        return f"{self.title} ({self.subscription.title})"
